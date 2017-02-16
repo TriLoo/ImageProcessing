@@ -7,7 +7,7 @@ function [ W, H ] = my_nmf( V, r, maxiter )
 %       Random Initialization, low speed to convergence.
 %------------------------------
 
-% input : V : image matrix 
+% input : V : image path 
 %         r : rank for the factorization
 %         maxiter : maximum number of iterations
 
@@ -20,7 +20,7 @@ if nargin ~= 3
     disp 'Usage : [w, h] = new_nmf(V, r, maxiter)'
     disp 'Copyright(C): http://TrueMark.cn'
 end
-v = imread('barbara.gif');
+v = imread(V);
 r = input('Choose your own rank for the factorization [49]:');
 if isempty(r)
     r = 49;
