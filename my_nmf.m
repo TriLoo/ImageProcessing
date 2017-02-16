@@ -18,7 +18,7 @@ inShowOn = 1;
 
 if nargin ~= 3
     disp 'Usage : [w, h] = new_nmf(V, r, maxiter)'
-    disp 'Copyright(C): http://TrueMark.cn'
+    disp 'Copyright(C): git@github.com:TriLoo/nmf_matlab.git'
 end
 v = imread(V);
 r = input('Choose your own rank for the factorization [49]:');
