@@ -4,7 +4,7 @@ function [ err ] = error_cal( V, W, H)
 % Data   : 2017.02.16
 % Description :
 %        Calculate the difference of V and W*H.
-%        ||V - WH||_F / ||V||
+%        ||V - WH||_F / ||V||_F
 %---------------------------
 sub = double(V) - W*H;
 
