@@ -14,12 +14,16 @@ rlnsw : redundant lifting non-separable wavelet.
 				U = P/2;
 
 2. inv_my_rlnsw.m
+
 			Input  : highpass & lowpass matrix H, L
+
 			Output : the matrix before RLNSW transform
 
 			Description :
+
 				get the image matrix.
 
 
 3. Problem :
+
 	After the RLNSW transform, the lowpass & highpass coefficient matrixs include negative numbers. 
