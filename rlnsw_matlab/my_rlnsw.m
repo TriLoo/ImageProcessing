@@ -16,6 +16,9 @@ clc;
 
 [m, n] = size(V);
 % matrix V process, add the two zero edges
+% TO DO ...
+
+V = double(V);
 
 % predict matrix
 P = [1, 3/4; 3/4, 9/16];
@@ -33,13 +36,12 @@ L = zeros(m,n);
 % Predict
 for i = 1:m
     for j = 1:n
-        if (i==1) || (i == m)        % ignore the first or last row
+        if(i==1) || (i == m)        % ignore the first or last row
             E(i,j) = V(i,j);
-        elseif (j==1) || (j == n)    % ignore the first or last column
+        elseif(j==1) || (j == n)    % ignore the first or last column
             E(i,j) = V(i,j); 
         else
-%             tmp = V();
-            E(i,j) = V(i,j) - P(1,1) * V(i-1,j-1) + P(1,2)*V(i-1,j+1) + P(2,1)*V(i+1, j-1) + P(2,2)*V(i+1, j+1);
+            E(i,j) = V(i,j) - P(1,1) * V(i-1,j-1) - P(1,2)*V(i-1,j+1) - P(2,1)*V(i+1, j-1) - P(2,2)*V(i+1, j+1);
         end
     end
 end
