@@ -12,4 +12,4 @@ Author don't guarantee the codes are all right. Just be examples.
 
 3. ./shearlet_matlab : the shearlet implemented based on matlab
 
-	the invert shearlet hasn't been completed.
+	The shearlet tool can recur the coefficient matrix obtained by shearlet transform.
