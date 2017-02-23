@@ -1,0 +1,36 @@
+function [ dst, shear_f ] = shearlet_dec( x )
+% ------------------------------
+% Author : smh
+% Data   : 2017. 02. 23
+% Description :
+%       This function call other function to complete the shearlet
+%       transform of x.
+% ------------------------------
+
+% if nargin <= 1
+%     level = 1;
+% end
+
+% dcomp = [3 3 4 4];
+% dsize = [32 32 16 16];
+
+[L, L] = size(x);
+
+shear_f = cell(1, 1);
+dst = cell(1, 1);
+
+w_s = shearing_filters_meyer(32, 3);
+
+for i=1:2^3
+    shear_f{1}(:, :, i) = (fft2(w_s(:, :, i), L, L)./L);
+end
+
+d = sum(shear_f{1}, 3);
+
+for i = 1:2^3
+    shear_f{1}(:,:,i)=shear_f{1}(:,:,i)./d;
+    dst{1}(:,:,i)=conv2p(shear_f{1}(:,:,i),x);
+end
+
+end
+
