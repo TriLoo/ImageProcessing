@@ -19,3 +19,7 @@ Author don't guarantee the codes are all right. Just be examples.
 	Multiresulotion : RLNSW
 
 	Directional     : Shearlet filters.
+
+5. ./gauss_filter_cpp  : the 5*5 gauss filte based on c plus plus
+
+	The first cpp file to do image process using opencv.
