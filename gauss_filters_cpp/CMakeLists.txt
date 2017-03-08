@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 2.8)
+	project(GaussFilter)
+	add_executable(GaussFilter main.cpp)
+	find_package(OpenCV REQUIRED)
+	target_link_libraries(GaussFilter ${OpenCV_LIBS})
