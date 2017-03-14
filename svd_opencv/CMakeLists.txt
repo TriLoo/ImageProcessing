@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 2.8)
+	project(svd_first)
+	add_executable(svd_first main.cpp)
+	find_package(OpenCV REQUIRED)
+	target_link_libraries(svd_first ${OpenCV_LIBS})

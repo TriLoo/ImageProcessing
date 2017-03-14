@@ -23,3 +23,10 @@ Author don't guarantee the codes are all right. Just be examples.
 5. ./gauss_filter_cpp  : the 5*5 gauss filte based on c plus plus
 
 	The first cpp file to do image process using opencv.
+
+6. ./svd_opencv : calculate the svd of inputted image
+	
+	use '''convertTo ''' to convert the char data to float data.
+
+	use '''svd::computer''' to calculate the SVD decompose.
+
