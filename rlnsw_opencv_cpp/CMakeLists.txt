@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 2.8)
+	project(rlnsw)
+	add_executable(rlnsw main.cpp)
+	find_package(OpenCV REQUIRED)
+	target_link_libraries(rlnsw ${OpenCV_LIBS})

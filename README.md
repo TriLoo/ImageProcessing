@@ -30,3 +30,20 @@ Author don't guarantee the codes are all right. Just be examples.
 
 	use '''svd::computer''' to calculate the SVD decompose.
 
+7/ ./rlnsw_opencv_cpp : implementation of rlnsw in c plus plus
+
+	rlnsw : redundant lifting non-seperable wavelet.
+
+	usage :
+
+		a. go to the build.
+
+		b. cmake ..
+
+		c. make 
+
+		d. rlnsw filename.imagetype
+
+		e. output the restored image obtained by rlnsw.
+
+
