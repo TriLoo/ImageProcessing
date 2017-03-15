@@ -46,4 +46,12 @@ Author don't guarantee the codes are all right. Just be examples.
 
 		e. output the restored image obtained by rlnsw.
 
+8. ./wavelet_opencv_cpp : implementation of two wavelets in c plus plus
+	
+	included : haar, sym2
+
+	Usage :
+		
+		see the rlnsw's part.
+
 
