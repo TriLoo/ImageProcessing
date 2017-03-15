@@ -4,6 +4,7 @@
 #include <opencv2/imgproc.hpp>
 #include <math.h>
 #include <assert.h>
+#include <ctime>
 
 using namespace std;
 using namespace cv;
@@ -233,6 +234,8 @@ int main(int argc, char **argv)
 	M.convertTo(img, CV_32F, 1.0/255);
 	Mat dst = Mat::zeros(img.rows, img.cols, CV_32F);
 
+	clock_t start = clock();
+
 	dst = WDT(img, "haar", 1);
 
 	Mat res = Mat::zeros(M.rows, M.cols, CV_8UC1);
@@ -244,6 +247,8 @@ int main(int argc, char **argv)
 
 	res = Mat::zeros(M.rows, M.cols, CV_8UC1);
 	dst.convertTo(res, CV_8UC1, 255);
+	double duration = (clock() - start)  / (double)CLOCKS_PER_SEC;
+	cout << "computation time : " << duration << endl;
 	//cout << res.data[1] << endl;
 	imwrite("waveleted.jpg", res);
 
