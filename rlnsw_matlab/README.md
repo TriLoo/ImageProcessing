@@ -23,7 +23,22 @@ rlnsw : redundant lifting non-separable wavelet.
 
 				get the image matrix.
 
+3. rlnsw.m :
+		
+	multi-levels rlnsw decompose.
 
-3. Problem :
+	Input : iamge matrix
+
+			level - the levels you want to decompose.
+
+	Output :
+			
+			a cell including all levels' coefficience matrixs.
+
+4. irlnsw.m :
+
+	multi-levels rlnsw reconstruction schedule.
+
+5. Problem :
 
 	After the RLNSW transform, the lowpass & highpass coefficient matrixs include negative numbers. 
