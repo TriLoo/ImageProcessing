@@ -10,6 +10,10 @@ function [ V ] = inv_my_rlnsw( H, L)
 % Input  : H : high pass coefficient
 %          L : low pass coefficient
 % Output : V : the outcome of invert transform based on input.
+% -------------!!!!! update !!!!------------------%
+% Update 2017. 03. 15 
+% Description : delete the "V = abs(V)" !
+% -------------!!!!! update !!!!------------------%
 
 if (size(H) ~= size(L))
     error('the size is error!');
@@ -37,7 +41,8 @@ for i=1:m
     end
 end
 
-V = abs(V);
+% V = abs(V);
+% V = V;
 
 end
 

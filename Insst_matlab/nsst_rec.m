@@ -19,7 +19,8 @@ for i = 1:level
     z{i+1} =real(sum(dst{i+1}, 3));
 end
 
-y = real(inv_rlnsw(z, level));
+% y = real(irlnsw(z, level));
+y = irlnsw(z, level);
 
 end
 
