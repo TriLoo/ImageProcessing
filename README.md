@@ -54,4 +54,15 @@ Author don't guarantee the codes are all right. Just be examples.
 		
 		see the rlnsw's part.
 
+9. ./improved rlnsw based on matlab
 
+	add the two level rlnsw to be one level:
+		horizontal&vertical predict + update
+		+
+		diagonal direction predict + update
+
+	so, here the real level is 2^(input level)
+
+	eg : [T, M, B] = rlnsw(V, 2);
+
+	here the real level is equal to original version's 2^2 = 4 levels
