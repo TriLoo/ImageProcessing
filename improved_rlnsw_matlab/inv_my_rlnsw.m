@@ -43,6 +43,8 @@ for i=1:m
     end
 end
 
+T = V;
+
 % horization direction
 for i=1:m
     for j=1:n
@@ -51,7 +53,7 @@ for i=1:m
         elseif (j==1)||(j==n)
             V(i,j) = L(i,j);
         else
-            V(i,j) = L(i,j) - U(1,1)*V(i-1,j) - U(1,2)*V(i,j-1) - U(2, 1)*V(i+1,j) - U(2,2)*V(i,j+1);
+            V(i,j) = L(i,j) - U(1,1)*T(i-1,j) - U(1,2)*T(i,j-1) - U(2, 1)*T(i+1,j) - U(2,2)*T(i,j+1);
         end        
     end
 end
