@@ -21,7 +21,8 @@ clc;
 V = double(V);
 
 % predict matrix
-P = [1, 3/4; 3/4, 9/16];
+% P = [1, 3/4; 3/4, 9/16];
+P = [1/4, 1/4; 1/4, 1/4];
 
 % update matrix 
 U = (1/2) * P;
