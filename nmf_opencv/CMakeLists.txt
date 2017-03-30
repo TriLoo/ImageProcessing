@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 2.8)
+	project(nmf)
+	add_executable(nmf main.cpp)
+	set(CMAKE_C_COMPILER g++)
+	add_definitions(-std=c++11)
+	#add_compile_options(-std=c++11)
+	find_package(OpenCV REQUIRED)
+	target_link_libraries(nmf ${OpenCV_LIBS})
