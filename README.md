@@ -66,3 +66,11 @@ Author don't guarantee the codes are all right. Just be examples.
 	eg : [T, M, B] = rlnsw(V, 2);
 
 	here the real level is equal to original version's 2^2 = 4 levels
+
+10. ./nmf_opencv
+
+	normal nmf algorithm based on opencv
+
+		Usage:
+
+			nmf  picture.name  rank  maxiter
