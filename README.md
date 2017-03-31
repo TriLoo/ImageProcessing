@@ -74,3 +74,9 @@ Author don't guarantee the codes are all right. Just be examples.
 		Usage:
 
 			nmf  picture.name  rank  maxiter
+
+	svd initialization  plus  multiplicative process
+
+		failed, result cannot restore to the origin image, don't know reason ... 
+
+		need more work ... 
