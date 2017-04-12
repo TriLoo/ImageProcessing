@@ -80,3 +80,17 @@ Author don't guarantee the codes are all right. Just be examples.
 		failed, result cannot restore to the origin image, don't know reason ... 
 
 		need more work ... 
+
+11. ./svd_cuda_cpp
+
+	image svd process based on NVIDIA CUDA
+
+	Usage :
+
+		svd image.name
+
+	Description :
+		
+		Read image data with OpenCV and calculate SVD based on cusolver and cublas libraries .
+
+		Time comsuption comparison between CUDA and OpenCV  
