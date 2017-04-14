@@ -81,6 +81,10 @@ Author don't guarantee the codes are all right. Just be examples.
 
 		need more work ... 
 
+	Latest news:
+
+		I just FIXed the bugs leading to wrong restorage, and I removed the 'W / W_sum' statement 
+
 11. ./svd_cuda_cpp
 
 	image svd process based on NVIDIA CUDA
