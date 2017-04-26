@@ -98,3 +98,20 @@ Author don't guarantee the codes are all right. Just be examples.
 		Read image data with OpenCV and calculate SVD based on cusolver and cublas libraries .
 
 		Time comsuption comparison between CUDA and OpenCV  
+
+12 ./inmf_cuda_opencv_cpp
+
+	image factorize based on improved nmf
+
+	Usage : 
+
+		svd image.name
+
+	Description :
+
+		read image data and then svd calculation
+
+		after svd, use the results to initialize nmf and multiply update ...
+
+
+
