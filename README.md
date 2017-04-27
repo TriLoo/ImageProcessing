@@ -114,4 +114,28 @@ Author don't guarantee the codes are all right. Just be examples.
 		after svd, use the results to initialize nmf and multiply update ...
 
 
+13 ./HTO_GF_matlab
+
+	hot-target-oriented image fusion based on guided filter
+
+	usage :
+		
+		Res = fusion(A, B);
+
+		A is visible image
+
+		B is infrared image
+
+	Data Type :
+
+		double
+
+	Description :
+
+		Include Histogram calculation and image fusin based on histogram information 
+
+		Then use guided filter to enhance the texture of fused image
+
+
+
 
