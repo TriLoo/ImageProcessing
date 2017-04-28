@@ -159,5 +159,7 @@ Author don't guarantee the codes are all right. Just be examples.
 		
 		but, when the image is small, the parallel version is not faster than serial implementation by C++ array !
 
+		if you will use this function many time, you can set this functioin to "inline"
+
 
 
