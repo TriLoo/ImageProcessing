@@ -136,6 +136,28 @@ Author don't guarantee the codes are all right. Just be examples.
 
 		Then use guided filter to enhance the texture of fused image
 
+14 ./histogram_cuda_cpp
+
+	calculation of histogram of input image
+
+	Usage :
+		
+		calHist(image.data, image size,distribution result);
+
+
+	Data Type : 
+
+		image data : unsigned char pointer to image data
+
+		size 	   : const int 
+
+		distribution result : unsigned int pointer, the distribution of result pointer : Range 0 ~ 256
+
+	Description :
+
+		with the help of addAtom, this function can calculate the image gray distribution in parallel way
+		
+		but, when the image is small, the parallel version is not faster than serial implementation by C++ array !
 
 
 
