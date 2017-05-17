@@ -162,4 +162,7 @@ Author don't guarantee the codes are all right. Just be examples.
 		if you will use this function many time, you can set this functioin to "inline"
 
 
+15. ./sobel_opencv_cpp
+	
+	edge detector by sobel filter
 
