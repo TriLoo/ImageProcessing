@@ -166,3 +166,8 @@ Author don't guarantee the codes are all right. Just be examples.
 	
 	edge detector by sobel filter
 
+16. ./histogram_fpga_hls
+
+	This dir include needed fpga source file to implement the histogram calculation and contranst enhancement based on Xilinx HLS tools.
+
+	The corresponding tutorial video can be found from https://www.youtube.com/watch?v=Po3KHF0SlIc&t=578s.
