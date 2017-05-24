@@ -56,6 +56,8 @@ void Sobel(Mat &imgIn, Mat &imgOut, Mat &sX, Mat &sY)
 	float rm = 0; 
 	float rb = 0;
 
+	//float T = 0;
+
 	for(int i = 1; i < imgRow - 1; i++)
 	{
 		for(int j = 1; j < imgCol - 1; j++)
@@ -77,9 +79,14 @@ void Sobel(Mat &imgIn, Mat &imgOut, Mat &sX, Mat &sY)
 			Y = lu*sY.at<float>(0,0) + mu*sY.at<float>(0,1) + ru*sY.at<float>(0,2) + lm*sY.at<float>(1,0) + mm*sY.at<float>(1,1) + rm*sY.at<float>(1,2) + lb*sY.at<float>(2,0) + mb*sY.at<float>(2,1) + rb*sY.at<float>(2,2);
 
 			//imgOut.at<float>(i, j) = sqrt(X * X + Y * Y);
-			imgOut.at<float>(i,j) = sqrt(X * X + Y * Y);
-
-			//if(T > )
+			//imgOut.at<float>(i,j) = sqrt(X * X + Y * Y);
+			T = sqrt(X * X + Y * Y);
+			if(T > 200)
+				imgOut.at<float>(i, j) = 255;
+			else if(T < 100)
+				imgOut.at<float>(i, j) = 0;
+			else
+				imgOut.at<float>(i, j) = T;
 		}
 	}
 
