@@ -168,6 +168,13 @@ Author don't guarantee the codes are all right. Just be examples.
 
 16. ./histogram_fpga_hls
 
-	This dir include needed fpga source file to implement the histogram calculation and contranst enhancement based on Xilinx HLS tools.
+	This dir include needed fpga source files to implement the histogram calculation and contranst enhancement based on Xilinx HLS tools.
 
 	The corresponding tutorial video can be found from https://www.youtube.com/watch?v=Po3KHF0SlIc&t=578s.
+
+17. ./sobel_cuda_cpp
+
+	This dir include the implementaton of sobel edge detection algorithm based on cuda. 
+
+	this is the first version, and the optimized version using texture memory is still under debugging...
+
