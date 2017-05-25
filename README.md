@@ -176,5 +176,7 @@ Author don't guarantee the codes are all right. Just be examples.
 
 	This dir include the implementaton of sobel edge detection algorithm based on cuda. 
 
-	this is the first version, and the optimized version using texture memory is still under debugging...
+	//this is the first version, and the optimized version using texture memory is still under debugging...
+
+	update : the second version using texture memory is uploaded. Usage: delete the origin sobel.cu and rename the sobel_optimized.cu to sobel.cu
 
