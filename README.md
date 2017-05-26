@@ -180,3 +180,8 @@ Author don't guarantee the codes are all right. Just be examples.
 
 	update : the second version using texture memory is uploaded. Usage: delete the origin sobel.cu and rename the sobel_optimized.cu to sobel.cu
 
+18. ./strech_cuda_cpp
+
+	this dir include a function to enhance the contrast of input image.
+	
+	very simple algorithm, so no more introduction.
