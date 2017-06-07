@@ -185,3 +185,11 @@ Author don't guarantee the codes are all right. Just be examples.
 	this dir include a function to enhance the contrast of input image.
 	
 	very simple algorithm, so no more introduction.
+
+19. ./NNDSVD_NMF_matlab
+
+	This dir includes the implementation of NNDSVD-based initialization of NMF. 
+
+	The Update rule is MM.
+
+	Implement based on Matlab.
