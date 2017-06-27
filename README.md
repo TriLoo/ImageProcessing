@@ -202,6 +202,8 @@ Author don't guarantee the codes are all right. Just be examples.
 
 	If you find errors, please let me know...
 
+	Oops, the passwd for the zip file is my Github Name: TriLoo
+
 	FreeBSD Copyright.
 
 	
