@@ -193,3 +193,15 @@ Author don't guarantee the codes are all right. Just be examples.
 	The Update rule is MM.
 
 	Implement based on Matlab.
+
+20. ./gff_matlab
+
+	This dir includes the implementation of 'image fusion with guided filter' based on matlab. 
+
+	More details about this fusion frame, please see the PDF paper.  Thanks to the paper authors.
+
+	If you find errors, please let me know...
+
+	FreeBSD Copyright.
+
+	
