@@ -206,4 +206,7 @@ Author don't guarantee the codes are all right. Just be examples.
 
 	FreeBSD Copyright.
 
+21. ./SRD_matlab
+
+	This dir includes matlab files which realizes "Global Contrast based Salient Region Detection" HC algorithm, but only fit to gray scale input image. 
 	
