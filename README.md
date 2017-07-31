@@ -210,3 +210,10 @@ Author don't guarantee the codes are all right. Just be examples.
 
 	This dir includes matlab files which realizes "Global Contrast based Salient Region Detection" HC algorithm, but only fit to gray scale input image. 
 	
+22. ./gff_OpenCV
+
+	This dir include the implementation of 'image fusion with guided filter' based on OpenCV.
+
+	More details can be found in corresponding paper.
+
+	Caution : GPL Copyright. !!!
