@@ -236,4 +236,6 @@ Author don't guarantee the codes are all right. Just be examples.
 
 	Implement based on boxfilter and subsample.m and usample.m .
 
+	The implementation of subsample.m and usample.m is referring to www.cnblogs.com/Allen-rg/p/5522412.html
+
 	Caution : GPL Copyright.
