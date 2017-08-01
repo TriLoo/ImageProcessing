@@ -217,3 +217,23 @@ Author don't guarantee the codes are all right. Just be examples.
 	More details can be found in corresponding paper.
 
 	Caution : GPL Copyright. !!!
+
+23. ./guidedFilter
+	
+	This dir implement the implementation of 'guided image filter' by He Kaiming etc.
+
+	Pseudocode can be found in corresponding paper.
+
+	It include two version: based on mean filter and box filter. Results show that the boxfilter can realize faster speed.
+
+	Caution : GPL Copyright.
+
+24. ./fastGuidedFilter
+
+	This dir implement the implementation of 'fast guided image filter' by He Kaiming etc.
+
+	Psedocode can be found in corresponding paper.
+
+	Implement based on boxfilter and subsample.m and usample.m .
+
+	Caution : GPL Copyright.
