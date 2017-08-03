@@ -239,3 +239,11 @@ Author don't guarantee the codes are all right. Just be examples.
 	The implementation of subsample.m and usample.m is referring to www.cnblogs.com/Allen-rg/p/5522412.html
 
 	Caution : GPL Copyright.
+
+25. ./boxfilter_cuda
+
+	This dir include the files implementing the box filter based on cuda.
+
+	Box filter is exactly the mean filter.
+
+	Include : based on linear memory and array memory two versions.
