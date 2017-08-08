@@ -247,3 +247,10 @@ Author don't guarantee the codes are all right. Just be examples.
 	Box filter is exactly the mean filter.
 
 	Include : based on linear memory and array memory two versions.
+
+26. ./ObjectTracking_opencv
+
+	This dir include the practice based on Learning OpenCV Website
+
+	So it is just calling some APIs and not involve any bottom implementation and algorithm structure
+	as well.
