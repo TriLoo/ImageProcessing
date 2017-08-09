@@ -254,3 +254,11 @@ Author don't guarantee the codes are all right. Just be examples.
 
 	So it is just calling some APIs and not involve any bottom implementation and algorithm structure
 	as well.
+
+27. ./NonPhotoRendering
+
+	This dir include the practice based on Learning OpenCV Website
+
+	So it is just calling some APIs and not involve any bottom implementation and algorithm struct 
+	as well.
+
