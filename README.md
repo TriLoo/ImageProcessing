@@ -262,3 +262,9 @@ Author don't guarantee the codes are all right. Just be examples.
 	So it is just calling some APIs and not involve any bottom implementation and algorithm struct 
 	as well.
 
+28. ./WeightMap_cuda_cpp
+
+	This dir include the function of Weight Saliency Map generation based on " Image fusion 
+	based on Guided Filter"
+
+	The code is not tested for now ! ! !
