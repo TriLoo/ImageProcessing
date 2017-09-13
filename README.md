@@ -268,3 +268,12 @@ Author don't guarantee the codes are all right. Just be examples.
 	based on Guided Filter"
 
 	The code is not tested for now ! ! !
+
+29. ./BoxFilterFinal_CUDA
+
+	This dir include the implementation of boxfilter based on four approaches:
+
+		A. boxiflter based on separable row & col accumulate, the fastest version
+		B. boxfilter based on shared memory                   the second fastest version
+		C. boxiflter based on global memory                   the second slowest version
+		D. boxfilter based on texture memory                  the slowest version
