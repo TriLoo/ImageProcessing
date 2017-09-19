@@ -26,8 +26,11 @@ public:
     void gaussfilterTex(float *imgOut, float *imgIn, int wid, int hei, float *filter, int filterW);
     void gaussfilterCon(float *imgOut, float *imgIn, int wid, int hei, int filterW);
     void gaussfilterSha(float *imgOut, float *imgIn, int wid, int hei, float *filter, int filterW);
-    void gaussfilterSep(float *imgOut, float *imgIn, int wid, int hei, float *filter, int filterW);
-    void gaussfilterShaSep(float *imgOut, float *imgIn, int wid, int hei, float *filter, int filterW);
+    //void gaussfilterSep(float *imgOut, float *imgIn, int wid, int hei, float *filter, int filterW);
+    // The fastest version
+    void gaussfilterShaSep(float *imgOut, float *imgIn, int wid, int hei, float *filterRow, float *filterCol, int filterW);
+
+    void gaussfilterFFT(float *imgOut, float *imgIn, int wid, int hei, float *filter, int filterW);
 
 private:
     float *d_imgIn_, *d_imgOut_;
