@@ -1,22 +1,49 @@
-//
-// Created by smher on 17-9-19.
-//
+/*
+ * twoscale.h
+ *
+ *  Created on: Sep 20, 2017
+ *      Author: smher
+ */
 
-#ifndef TWOSCALE_TWOSCALE_H
-#define TWOSCALE_TWOSCALE_H
+#ifndef TWOSCALE_H_
+#define TWOSCALE_H_
 
-#include "headers.h"
-#include "filter.h"
+#include <iostream>
+#include <cassert>
+#include <ctime>
+#include <cuda.h>
+#include <cuda_runtime.h>
+#include <cuda_runtime_api.h>
 
-class TwoScale: public virtual Filter
+#include <opencv2/highgui.hpp>
+#include <opencv2/imgproc.hpp>
+
+using namespace std;
+using namespace cv;
+
+class BFilter
 {
 public:
-    TwoScale() = default;
-    TwoScale(int r, int w, int h):Filter(r, w, h){}
-    ~TwoScale();
+	BFilter(int wid, int hei);
+	~BFilter();
+	void boxfilter(float *d_imgOut, float *d_imgIn, int wid, int hei, int filterR);
+	void boxfilterTest(float *imgOut, float *imgIn, int wid, int hei, int filterR);
+private:
+	float *d_imgIn_, *d_imgOut_;
+};
 
-    void twoscale(float *d_imgOut, float *d_imgIn, int wid, int hei, int rad);
+class TScale: public virtual BFilter
+{
+public:
+	TScale(int w, int h):BFilter(w, h){}
+	~TScale(){}
+
+	void twoscale(float *d_imgOutA, float *d_imgOutB, float *d_imgIn, int wid, int hei, int filterR);
+	void twoscaleTest(float *imgOutA, float *imgOutB, float *imgIn, int wid, int hei, int filterR);
 private:
 };
 
-#endif //TWOSCALE_TWOSCALE_H
+
+
+
+#endif /* TWOSCALE_H_ */
