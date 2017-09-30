@@ -277,3 +277,9 @@ Author don't guarantee the codes are all right. Just be examples.
 		B. boxfilter based on shared memory                   the second fastest version
 		C. boxiflter based on global memory                   the second slowest version
 		D. boxfilter based on texture memory                  the slowest version
+
+30. ./GuidedFilter_CUDA
+
+	This dir include the implementatioin of guided filter based on CUDA
+
+
