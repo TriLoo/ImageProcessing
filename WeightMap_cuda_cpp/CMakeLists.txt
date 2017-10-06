@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD 11)
 
 include_directories(./)
 include(/usr/share/cmake-3.2/Modules/FindCUDA.cmake)
-set(SOURCE_FILES main.cpp WMap.cu)
+set(SOURCE_FILES main.cpp WMap.cu BFilter.cu GFilter.cu)
 cuda_add_executable(WeightedMap ${SOURCE_FILES})
 
 link_libraries(/usr/local/cuda/lib64)
