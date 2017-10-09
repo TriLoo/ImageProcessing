@@ -53,6 +53,13 @@ FIBITMAP* LoadImg(const char *sf)
 int main() {
     std::cout << "Hello, World!" << std::endl;
 
+    clock_t start, stop;
+    /*
+    cudaEvent_t start, stop;
+    cudaEventCreate(&start);
+    cudaEventCreate(&stop);
+    */
+
     Mat img = imread("lena.jpg", IMREAD_GRAYSCALE);
 
     try
@@ -78,6 +85,8 @@ int main() {
     cudaDeviceProp deviceProp;
     cudaGetDeviceProperties(&deviceProp, 0);
     cout << "cudaSetDevice GPU " << 0 << " = " << deviceProp.name << endl;
+    cout << "Concurrent Kernels : " << deviceProp.concurrentKernels << endl;
+    cout << "Can Map Host Memory : " << deviceProp.canMapHostMemory << endl;
     //cout << "max Texture 2D : " << deviceProp.maxTexture2D << endl;
 
     cudaError_t cudaState = cudaSuccess;
@@ -87,6 +96,7 @@ int main() {
 
     FIBITMAP *pSrcBmp, *pDstBmp;
     unsigned char *pSrcData, *pDstData;
+//    Npp8u *pSrcData, *pDstData;
     Npp8u *pSrcDataCUDA, *pDstDataCUDA;
 
     NppiSize oSrcSize, oDstSize;
@@ -100,7 +110,8 @@ int main() {
     pSrcBmp = LoadImg("lena.jpg");
     assert(pSrcBmp != NULL);
 
-    nImgBpp = (FreeImage_GetBPP(pSrcBmp));
+    // FreeImage_GetBpp return pitch by bytes
+    nImgBpp = (FreeImage_GetBPP(pSrcBmp) >> 3);   // >> 3 equal to /8
     cout << "The depth of input image : " << nImgBpp << endl;
 
     pSrcData = FreeImage_GetBits(pSrcBmp);
@@ -117,11 +128,9 @@ int main() {
     oSrcROI.height = oSrcSize.height;
 
     checkCudaErrors(cudaSetDevice(0));
-    /*
     oDstSize.width = (int)FreeImage_GetWidth(pSrcBmp);
     oDstSize.height = (int)FreeImage_GetHeight(pSrcBmp);
     nDstPitch = (int)FreeImage_GetPitch(pSrcBmp);
-    */
 
     // 分配显存
     pSrcDataCUDA = nppiMalloc_8u_C3(oSrcSize.width, oSrcSize.height, &nSrcPitchCUDA);
@@ -129,10 +138,14 @@ int main() {
     assert(pSrcDataCUDA != NULL);
 
     // 将原图传入显存
-    checkCudaErrors(cudaMemcpy2D(pSrcDataCUDA, nSrcPitchCUDA, pSrcData, nSrcPitch, oSrcSize.width * nImgBpp, oSrcSize.height, cudaMemcpyHostToDevice));
-    //cudaMemcpy2D(pSrcDataCUDA, nSrcPitchCUDA, pSrcData, nSrcPitch, oSrcSize.width * nImgBpp, oSrcSize.height, cudaMemcpyHostToDevice);
+    int widthPitch = oSrcSize.width * nImgBpp * sizeof(unsigned char);
+    //checkCudaErrors(cudaMemcpy2D(pSrcDataCUDA, nSrcPitchCUDA, pSrcData, nSrcPitch, oSrcSize.width * nImgBpp, oSrcSize.height, cudaMemcpyHostToDevice));
+    checkCudaErrors(cudaMemcpy2D(pSrcDataCUDA, nSrcPitchCUDA, pSrcData, widthPitch, widthPitch, oSrcSize.height, cudaMemcpyHostToDevice));
+
+    // FIBITMAP * FreeImage_Allocate(int width, int height, int bpp, unsigend red_mask ...);
+    // the bpp in above function should be in bytes
     // 建立目标图
-    pDstBmp = FreeImage_Allocate(oDstSize.width, oDstSize.height, nImgBpp);
+    pDstBmp = FreeImage_Allocate(oDstSize.width, oDstSize.height, nImgBpp << 3);
     assert(pDstBmp != NULL);
     pDstData = FreeImage_GetBits(pDstBmp);
 
@@ -152,9 +165,21 @@ int main() {
 
     // boxfilter处理
     //nppiFilterBoxBorder_8u_C3R()
-    NppiSize oMaskSize = {5, 5};
+    NppiSize oMaskSize = {31, 31};  // the width and height of the neighborhood region for the local avg operation
     NppiPoint oAnchor = {oMaskSize.width / 2, oMaskSize.height / 2};
+    start = clock();
+    //cudaEventRecord(start, 0);
     nppState = nppiFilterBoxBorder_8u_C3R(pSrcDataCUDA, nSrcPitchCUDA, oDstSize, {0, 0}, pDstDataCUDA, nDstPitchCUDA, oDstSize, oMaskSize, oAnchor, NPP_BORDER_REPLICATE);
+    /*
+    cudaEventRecord(stop, 0);
+    cudaEventSynchronize(stop);
+    float elapsedTime;
+    cudaEventElapsedTime(&elapsedTime, start, stop);
+    cout << "BoxFilter based on NPPi : " << elapsedTime << " ms" << endl;
+    */
+    cudaDeviceSynchronize();   // must call this function before record the value of 'stop'
+    stop = clock();
+    cout << "BoxFilter based on NPPi : " << 1000.0 * (stop - start) / CLOCKS_PER_SEC << " ms" << endl;
     assert(nppState == NPP_NO_ERROR);
 
 
@@ -170,6 +195,8 @@ int main() {
 
     FreeImage_Unload(pSrcBmp);
     FreeImage_Unload(pDstBmp);
+
+    cout << "Npp Boxfilter done !" << endl;
 
     return 0;
 }
