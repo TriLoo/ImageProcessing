@@ -4,6 +4,11 @@
 
 #include "GffFusion.h"
 
+#define GUIRAD_B 45
+#define GUIEPS_B 0.3
+#define GUIRAD_D 10
+#define GUIEPS_D 0.0001
+
 void GffFusion::TwoScale(const Mat &inA, Size ksize, Mat &outH, Mat &outL)
 {
     // use average filter to get the twoscale decomposing
@@ -53,13 +58,14 @@ void GffFusion::WeightMap(Mat &imgInA, Mat &imgInB, vector<Mat *> &vecA, vector<
     // use guided filter to get the weighted map, ----  cannot find this function
     clock_t start, stop;
     start = clock();
-    *(vecA[0]) = guidedFilter(imgInA, imgMapA, 20, 0.1, CV_32F);
+    //*(vecA[0]) = guidedFilter(imgInA, imgMapA, 20, 0.1, CV_32F);
+    *(vecA[0]) = guidedFilter(imgInA, imgMapA, GUIRAD_B, GUIEPS_B, CV_32F);
     stop = clock();
     cout << "Guided Filter Time : " << (stop - start) * 1.0 / CLOCKS_PER_SEC * 1000.0 << " ms" << endl;
-    *(vecA[1]) = guidedFilter(imgInA, imgMapA, 10, 0.01, CV_32F);
+    *(vecA[1]) = guidedFilter(imgInA, imgMapA, GUIRAD_D, GUIEPS_D, CV_32F);
 
-    *(vecB[0]) = guidedFilter(imgInB, imgMapB, 20, 0.1, CV_32F);
-    *(vecB[1]) = guidedFilter(imgInB, imgMapB, 10, 0.01, CV_32F);
+    *(vecB[0]) = guidedFilter(imgInB, imgMapB, GUIRAD_B, GUIEPS_B, CV_32F);
+    *(vecB[1]) = guidedFilter(imgInB, imgMapB, GUIRAD_D, GUIEPS_D, CV_32F);
 
     // test for bilateralFilter ----   can find this function
     //bilateralFilter(imgInA, *(vec[0]), 10, 1, 1);
@@ -188,11 +194,28 @@ void GffFusion::gffFusionColor(Mat &imgA, Mat &imgB, Mat &Res)
 
     // test the results, save the results based on boost!
     boost::format fmt("%s_%d.%s");   // color_i.jpg
+    //cout << "imgA.channels = " << imgA.channels() << endl;
+    if(channs == 3)
+    {
+        cout << "Begin boost::thread..." << endl;
+        //boost::thread t0(&GffFusion::gffFusion, this, bgrA[0], bgrB[0], outF[0]);
+        //boost::thread t0([&, bgrA, bgrB, outF]{this->gffFusion(bgrA[0], bgrB[0], outF[0]);});
+        boost::thread t0(bind(&GffFusion::gffFusion, this, bgrA[0], bgrB[0], outF[0]));
+        boost::thread t1(bind(&GffFusion::gffFusion, this, bgrA[1], bgrB[1], outF[1]));
+        boost::thread t2(bind(&GffFusion::gffFusion, this, bgrA[2], bgrB[2], outF[2]));
+        t0.join();
+        t1.join();
+        t2.join();
+        cout << "blue width = " << outF[0].size() << endl;
+        //cout << "blue width = " << bgrA[0].size() << endl;
+    }
+    /*
     for(int i = 0; i < channs; i++)
     {
         //imwrite((fmt%"color"%i%"jpg").str(), bgrA[i]);
         gffFusion(bgrA[i], bgrB[i], outF[i]);
     }
+    */
 
     merge(outF, channs, Res);
 }
