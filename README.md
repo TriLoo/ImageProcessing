@@ -285,3 +285,9 @@ Author don't guarantee the codes are all right. Just be examples.
 31. ./PCA_Python
 
 	This dir include the implementation of PCA based on Python
+
+32. ./ImageMosaicing_opencv
+
+	This dir include the implementation of 'Image Mosaicing' based on ORB features.
+
+	More details can see : http://www.cnblogs.com/skyfsm/p/7411961.html.
