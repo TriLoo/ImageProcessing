@@ -17,6 +17,7 @@
 #include "cuda.h"
 #include "cuda_runtime.h"
 #include "cuda_runtime_api.h"
+#include "npp.h"
 #include "nppi.h"
 
 using namespace std;
@@ -25,7 +26,11 @@ using namespace cv;
 //#ifdef __cplusplus
 //extern "C"
 //{
-int histEquNpp(Mat &out, Mat &in);
+class histEqu
+{
+public:
+    int histEquNpp(Mat &imgOut, Mat &imgIn);
+};
 //};
 //#endif
 

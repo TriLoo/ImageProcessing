@@ -22,8 +22,8 @@ set(CUDA_DIRS /usr/local/cuda/lib64)
 
 target_link_libraries(HistEquNPP ${OpenCV_LIBS})
 #message(STATUS "CUDA Libs : ${CUDA_LIBRARIES}")
-#target_link_libraries(HistEquNPP ${CUDA_LIBRARIES})
-#target_link_libraries(HistEquNPP ${CUDA_DIRS}/libnppc.so)
-#target_link_libraries(HistEquNPP ${CUDA_DIRS}/libnppi.so)
-#target_link_libraries(HistEquNPP ${CUDA_DIRS}/libcufft.so)
+target_link_libraries(HistEquNPP ${CUDA_LIBRARIES})
+target_link_libraries(HistEquNPP ${CUDA_DIRS}/libnppc.so)
+target_link_libraries(HistEquNPP ${CUDA_DIRS}/libnppi.so)
+target_link_libraries(HistEquNPP ${CUDA_DIRS}/libcufft.so)
 

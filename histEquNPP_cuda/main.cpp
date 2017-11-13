@@ -8,12 +8,13 @@ int main() {
 
     Mat imgIn = imread("lena.jpg");
 
-    assert(!imgIn.data);
+    assert(imgIn.data != NULL);
 
     Mat imgOut = Mat::zeros(imgIn.size(), imgIn.type());     // depth() or type()
 
     //histEquNpp(imgOut, imgIn);
-    cout << histEquNpp(imgOut, imgIn) << endl;
+    histEqu he;
+    cout << he.histEquNpp(imgOut, imgIn) << endl;
 
     return 0;
 }
