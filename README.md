@@ -291,3 +291,11 @@ Author don't guarantee the codes are all right. Just be examples.
 	This dir include the implementation of 'Image Mosaicing' based on ORB features.
 
 	More details can see : http://www.cnblogs.com/skyfsm/p/7411961.html.
+
+33. ./HistEqu_NPP
+
+	This dir include the implementation of 'Histogram Equlization based on NPP'.
+
+	Moredetails can see : CUDA Examples.
+
+
