@@ -1,7 +1,7 @@
 //#include <iostream>
 #include "histEqu.h"
 
-extern int histEquNpp(Mat &, Mat &);
+//extern int histEquNpp(Mat &, Mat &);
 
 int main() {
     std::cout << "Hello, World!" << std::endl;
