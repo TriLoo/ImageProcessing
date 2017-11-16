@@ -39,8 +39,8 @@ int main() {
     float *imgA_P = (float *)(imgInA.data);
     float *imgB_P = (float *)(imgInB.data);
 
-    Mat imgOutA = Mat::zeros(Size(row, col), CV_32F);
-    Mat imgOutB = Mat::zeros(Size(row, col), CV_32F);
+    Mat imgOutA = Mat::zeros(Size(col, row), CV_32F);
+    Mat imgOutB = Mat::zeros(Size(col, row), CV_32F);
 
     float *imgOutA_P = (float *)imgOutA.data;
     float *imgOutB_P = (float *)imgOutB.data;
