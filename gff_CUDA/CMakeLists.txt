@@ -1,29 +1,30 @@
-cmake_minimum_required(VERSION 3.7)
-project(GffFusion)
-
-message(STATUS  "Project: GffFusion")
-message(STATUS  "Project Director: ${PROJECT_SOURCE_DIR}")
-
-set(CMAKE_BUILD_TYPE DEBUG)
+cmake_minimum_required(VERSION 3.2)
+project(gffFusionFinal)
 
 set(CMAKE_CXX_STANDARD 11)
 
-set(SOURCE_FILES main.cpp)
-
-include(/usr/share/cmake-2.8/Modules/FindCUDA.cmake)
-cuda_add_executable(GffFusion ${SOURCE_FILES})
-
-# add link direcories
-link_libraries(/usr/local/cuda/lib64)
-set(LIBS_DIR /usr/local/cuda/lib64)
+include(/usr/share/cmake-3.2/Modules/FindCUDA.cmake)
 
 find_package(OpenCV REQUIRED)
 find_package(CUDA REQUIRED)
+find_package(Boost REQUIRED COMPONENTS system thread)   # No format library
 
-message(STATUS "The OpenCV_LIBS is : ${OpenCV_LIBS}")
-#message(STATUS "The CUDA_LIBS is : ${CUDA}")
+include_directories(${OpenCV_INCLUDE_DIRS})
+include_directories(${CUDA_INCLUDE_DIRS})
+include_directories(${Boost})
+#message(STATUS ${Boost_INCLUDE_DIRS})
+#message(STATUS ${CUDA_INCLUDE_DIRS})
 
-target_link_libraries(GffFusion ${OpenCV_LIBS})
-target_link_libraries(GffFusion ${LIBS_DIR}/libcublas.so)
-target_link_libraries(GffFusion ${LIBS_DIR}/libcusolver.so)
-link_directories("/usr/local/cuda/lib64")
+set(SOURCE_FILES main.cpp gff.cu BFilter.cu TwoScale.cu GFilter.cu WeightedMap.cu)
+cuda_add_executable(gffFusionFinal ${SOURCE_FILES})
+
+set(CUDA_LIBS /usr/local/cuda/lib64)
+
+#message(STATUS ${CUDA_LIBRARIES})
+message(STATUS ${Boost_LIBRARIES})
+
+target_link_libraries(gffFusionFinal ${OpenCV_LIBS} ${CUDA_LIBRARIES})
+target_link_libraries(gffFusionFinal ${CUDA_LIBS}/libcublas.so)
+target_link_libraries(gffFusionFinal ${CUDA_LIBS}/libnppi.so)
+target_link_libraries(gffFusionFinal ${CUDA_LIBS}/libcufft.so)
+target_link_libraries(gffFusionFinal ${Boost_LIBRARIES})
