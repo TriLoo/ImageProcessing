@@ -16,8 +16,10 @@ public:
 
     void guidedfilter(float *d_imgOut, float *d_imgInI, float *d_imgInP, int wid, int hei, int rad, double eps);
     void guidedfilterTest(float *imgOut, float *imgInI, float *imgInP, int wid, int hei, int rad, double eps);
-private:
+//private:
+protected:     // the Weighted map can see these variables.
     float *d_tempA_, *d_tempB_, *d_tempC_, *d_tempD_;
+private:
 };
 
 

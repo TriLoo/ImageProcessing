@@ -10,7 +10,10 @@
 class WMap : public GFilter
 {
 public:
+    //using GFilter::GFilter;
     WMap() = default;
+    WMap(int wid, int hei, int lr, int gr);
+    //WMap(int wid, int hei);
     ~WMap();
 
     void weightedmap(float *d_imgOutA, float *d_imgOutB, float *d_imgInA, float *d_imgInB, int wid, int hei, int lr, int gr, int gsigma, int guir, double eps);
@@ -28,7 +31,7 @@ private:
 
     int lrad_, grad_;
     float *d_lap_, *d_gau_;
-    //float *d_tempA_, *d_tempB_;
+    float *d_tempE_, *d_tempF_;
 };
 
 #endif //GFFFUSIONFINAL_WEIGHTEDMAP_H

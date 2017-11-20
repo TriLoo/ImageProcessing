@@ -128,7 +128,7 @@ void BFilter::boxfilter(float *d_imgOut, float *d_imgIn, int wid, int hei, int f
     d_boxfilter_y_global<<<blockPerGrid, threadPerBlock>>>(d_imgOut, d_temp, wid, hei, filterR);
     //cout << cudaGetErrorString(cudaPeekAtLastError()) << endl;
 
-    cudaCheckErrors(cudaDeviceSynchronize());
+    //cudaCheckErrors(cudaDeviceSynchronize());
 
     if(d_temp)
         cudaFree(d_temp);

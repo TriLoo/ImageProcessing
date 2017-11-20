@@ -1,9 +1,28 @@
 #include "WeightedMap.h"
+
 #define GaussW 11
+
+WMap::WMap(int wid, int hei, int lr, int gr) : GFilter(wid, hei)
+{
+    int lw = (lr << 1) + 1;
+    int gw = (gr << 1) + 1;
+    cudaCheckErrors(cudaMalloc((void **)&d_lap_, sizeof(float) * lw * lw));
+    cudaCheckErrors(cudaMalloc((void **)&d_gau_, sizeof(float) * gw));
+    cudaCheckErrors(cudaMalloc((void **)&d_tempE_, sizeof(float) * wid * hei));
+    cudaCheckErrors(cudaMalloc((void **)&d_tempF_, sizeof(float) * wid * hei));
+}
+
 
 WMap::~WMap()
 {
-
+    if(d_lap_)
+        cudaFree(d_lap_);
+    if(d_gau_)
+        cudaFree(d_gau_);
+    if(d_tempE_)
+        cudaFree(d_tempE_);
+    if(d_tempF_)
+        cudaFree(d_tempF_);
 }
 
 // do absolute laplacian filter based on shared memory
@@ -165,4 +184,205 @@ __global__ void comparison_kernel(float *outA, float *outB, float *inA, float *i
     int val = (inA[offset] >= inB[offset]) ? 1 : 0;
     outA[offset] = val;
     outB[offset] = 1 - val;
+}
+
+// laplacian filter
+void WMap::laplacianAbs(float *d_imgOut, float *d_imgIn, int wid, int hei, int lr)
+{
+    int lw = lr * 2 + 1;
+    float *lapfilter = new float [lw * lw];
+
+    cudaStream_t st;
+    cudaCheckErrors(cudaStreamCreate(&st));
+
+    // 3 * 3 laplacian filter
+    lapfilter[0] = -1;      lapfilter[1] = -1;      lapfilter[2] = -1;
+    lapfilter[3] = -1;      lapfilter[4] = 8;      lapfilter[5] = -1;
+    lapfilter[6] = -1;      lapfilter[7] = -1;      lapfilter[8] = -1;
+
+    // copy laplacian filter from host to device
+    cudaCheckErrors(cudaMemcpy(d_lap_, lapfilter, sizeof(float) * lw * lw, cudaMemcpyHostToDevice));
+
+    // do kernel on GPU
+    dim3 threadPerBlock(BLOCKSIZE, BLOCKSIZE);
+    dim3 blockPerGrid;
+    blockPerGrid.x = (wid + threadPerBlock.x - 1) / threadPerBlock.x;
+    blockPerGrid.y = (hei + threadPerBlock.y - 1) / threadPerBlock.y;
+
+    // launch kernel function
+    int TileW = BLOCKSIZE + 2 * lr;
+    laplacianAbs_kernel<<<blockPerGrid, threadPerBlock, sizeof(float) * TileW * TileW, st>>>(d_imgOut, d_imgIn, wid, hei, d_lap_, lr);
+
+    //cout << "Laplacian filter : " << cudaGetErrorString(cudaPeekAtLastError()) << endl;
+
+    if(lapfilter)
+        delete [] lapfilter;
+
+    cudaCheckErrors(cudaStreamDestroy(st));
+}
+
+void WMap::laplacianAbsTest(float *imgOut, float *imgIn, int wid, int hei, int lr)
+{
+    float *d_imgIn, *d_imgOut;
+
+    cudaCheckErrors(cudaMalloc((void **)&d_imgIn, sizeof(float) * wid * hei));
+    cudaCheckErrors(cudaMemcpy(d_imgIn, imgIn, sizeof(float) * wid * hei, cudaMemcpyHostToDevice));
+
+    cudaCheckErrors(cudaMalloc((void **)&d_imgOut, sizeof(float) * wid * hei));
+    cudaCheckErrors(cudaMemset(d_imgOut, 0, sizeof(float) * wid * hei));
+
+    laplacianAbs(d_imgOut, d_imgIn, wid, hei, lr);
+
+    cudaCheckErrors(cudaMemcpy(imgOut, d_imgOut, sizeof(float) * wid * hei, cudaMemcpyDeviceToHost));
+
+    cudaDeviceSynchronize();
+
+    cudaFree(d_imgIn);
+    cudaFree(d_imgOut);
+}
+
+void WMap::gaussian(float *d_imgOut, float *d_imgIn, int wid, int hei, int gr, int gsigma)
+{
+    int filterW = 2 * gr + 1;
+    float *filter = new float [filterW];
+
+    cudaStream_t st;
+    cudaCheckErrors(cudaStreamCreate(&st));
+
+    // generate row filter :
+    filter[0] = -0.0663;    filter[1] = -0.0794;    filter[2] = -0.0914;
+    filter[3] = -0.1010;    filter[4] = -0.1072;    filter[5] = -0.1094;
+    filter[6] = -0.1072;    filter[7] = -0.1010;    filter[8] = -0.0914;
+    filter[9] = -0.0794;    filter[10] = -0.0663;
+
+
+    // copy filter data from host to device
+    cudaCheckErrors(cudaMemcpy(d_gau_, filter, sizeof(float) * filterW, cudaMemcpyHostToDevice));
+
+    // prepare needed memory on device
+    float *d_temp;
+    cudaCheckErrors(cudaMalloc((void **)&d_temp, sizeof(float) * wid * hei));
+    cudaCheckErrors(cudaMemset(d_temp, 0, sizeof(float) * wid * hei));
+
+    int TileW = BLOCKSIZE + 2 * gr;
+
+    dim3 threadPerBlock(BLOCKSIZE, BLOCKSIZE);
+    dim3 blockPerGrid;
+    blockPerGrid.x = (wid + threadPerBlock.x - 1) / threadPerBlock.x;
+    blockPerGrid.y = (hei + threadPerBlock.y - 1) / threadPerBlock.y;
+
+    gaussfilterRow_kernel<<<blockPerGrid, threadPerBlock, sizeof(float) * TileW * BLOCKSIZE, st>>>(d_temp, d_imgIn, wid, hei, d_gau_, gr);
+    //cout << "In gaussian filter ROW part : " << cudaGetErrorString(cudaPeekAtLastError()) << endl;
+
+    gaussfilterCol_kernel<<<blockPerGrid, threadPerBlock, sizeof(float) * TileW * BLOCKSIZE, st>>>(d_imgOut, d_temp, wid, hei, d_gau_, gr);
+    //cout << "In gaussian filter COL part : " << cudaGetErrorString(cudaPeekAtLastError()) << endl;
+
+    cudaStreamDestroy(st);
+
+    if(d_temp)
+        cudaFree(d_temp);
+    if(filter)
+        delete [] filter;
+}
+
+void WMap::gaussianTest(float *imgOut, float *imgIn, int wid, int hei, int gr, int gsigma)
+{
+    float *d_imgIn, *d_imgOut;
+
+    cudaCheckErrors(cudaMalloc((void **)&d_imgIn, sizeof(float) * wid * hei));
+    cudaCheckErrors(cudaMemcpy(d_imgIn, imgIn, sizeof(float) * wid * hei, cudaMemcpyHostToDevice));
+
+    cudaCheckErrors(cudaMalloc((void **)&d_imgOut, sizeof(float) * wid * hei));
+    cudaCheckErrors(cudaMemset(d_imgOut, 0, sizeof(float) * wid * hei));
+
+    gaussian(d_imgOut, d_imgIn, wid, hei, gr, 0.1);
+
+    cudaCheckErrors(cudaMemcpy(imgOut, d_imgOut, sizeof(float) * wid * hei, cudaMemcpyDeviceToHost));
+
+    cudaDeviceSynchronize();
+
+    cudaFree(d_imgIn);
+    cudaFree(d_imgOut);
+}
+
+// do the saliency map generation
+void WMap::saliencymapTest(float *imgOut, float *imgIn, int wid, int hei, int lr, int gr, double gsigma)
+{
+    float *d_imgIn, *d_imgOut;
+
+    cudaCheckErrors(cudaMalloc((void **)&d_imgIn, sizeof(float) * wid * hei));
+    cudaCheckErrors(cudaMemcpy(d_imgIn, imgIn, sizeof(float) * wid * hei, cudaMemcpyHostToDevice));
+
+    cudaCheckErrors(cudaMalloc((void **)&d_imgOut, sizeof(float) * wid * hei));
+    cudaCheckErrors(cudaMemset(d_imgOut, 0, sizeof(float) * wid * hei));
+
+    laplacianAbs(d_imgOut, d_imgIn, wid, hei, lr);
+    gaussian(d_imgOut, d_imgOut, wid, hei, gr, gsigma);
+
+    cudaCheckErrors(cudaMemcpy(imgOut, d_imgOut, sizeof(float) * wid * hei, cudaMemcpyDeviceToHost));
+
+    cudaDeviceSynchronize();
+
+    cudaFree(d_imgIn);
+    cudaFree(d_imgOut);
+}
+
+void WMap::weightedmap(float *d_imgOutA, float *d_imgOutB, float *d_imgInA, float *d_imgInB, int wid, int hei, int lr,
+                       int gr, int gsigma, int guir, double eps)
+{
+    laplacianAbs(d_tempE_, d_imgInA, wid, hei, lr);
+    laplacianAbs(d_tempF_, d_imgInB, wid, hei, lr);
+
+    //gaussian(d_imgOutA, d_tempA_, wid, hei, gr, gsigma);
+    //gaussian(d_imgOutB, d_tempB_, wid, hei, gr, gsigma);
+    gaussian(d_tempE_, d_tempE_, wid, hei, gr, gsigma);
+    gaussian(d_tempF_, d_tempF_, wid, hei, gr, gsigma);
+
+    dim3 threadPerBlock(BLOCKSIZE, BLOCKSIZE);
+    dim3 blockPerGrid;
+    blockPerGrid.x = (wid + threadPerBlock.x - 1) / threadPerBlock.x;
+    blockPerGrid.y = (hei + threadPerBlock.y - 1) / threadPerBlock.y;
+    comparison_kernel<<<blockPerGrid, threadPerBlock>>>(d_tempE_, d_tempF_, d_tempE_, d_tempF_, wid, hei);
+    //comparison_kernel<<<blockPerGrid, threadPerBlock>>>(d_imgOutA, d_imgOutB, d_tempE_, d_tempF_, wid, hei);
+
+    /*
+    GFilter gf(wid, hei);
+    gf.guidedfilter(d_imgOutA, d_imgInA, d_tempE_, wid, hei, guir, eps);
+    gf.guidedfilter(d_imgOutB, d_imgInB, d_tempF_, wid, hei, guir, eps);
+    */
+    guidedfilter(d_imgOutA, d_imgInA, d_tempE_, wid, hei, guir, eps);
+    guidedfilter(d_imgOutB, d_imgInB, d_tempF_, wid, hei, guir, eps);
+
+    cudaDeviceSynchronize();
+}
+
+void WMap::weightedmapTest(float *imgOutA, float *imgOutB, float *imgInA, float *imgInB, int wid, int hei, int lr,
+                           int gr, int gsigma, int guir, double eps)
+{
+    cudaEvent_t cudaStart, cudaStop;
+
+    float *d_imgInA, *d_imgOutA, *d_imgInB, *d_imgOutB;
+    cudaCheckErrors(cudaMalloc((void **)&d_imgInA, sizeof(float) * wid * hei));
+    cudaCheckErrors(cudaMalloc((void **)&d_imgInB, sizeof(float) * wid * hei));
+    cudaCheckErrors(cudaMalloc((void **)&d_imgOutA, sizeof(float) * wid * hei));
+    cudaCheckErrors(cudaMalloc((void **)&d_imgOutB, sizeof(float) * wid * hei));
+
+    cudaCheckErrors(cudaMemcpy(d_imgInA, imgInA, sizeof(float) * wid * hei, cudaMemcpyHostToDevice));
+    cudaCheckErrors(cudaMemcpy(d_imgInB, imgInB, sizeof(float) * wid * hei, cudaMemcpyHostToDevice));
+
+    cudaEventCreate(&cudaStart);
+    cudaEventCreate(&cudaStop);
+
+    cudaEventRecord(cudaStart, 0);
+
+    weightedmap(d_imgOutA, d_imgOutB, d_imgInA, d_imgInB, wid, hei, lr, gr, gsigma, guir, eps);
+
+    cudaEventRecord(cudaStop, 0);
+    cudaEventSynchronize(cudaStop);
+    float elapsedTime;
+    cudaEventElapsedTime(&elapsedTime, cudaStart, cudaStop);
+    cout << "Weighted Map GPU Time (no memory copy) : " << elapsedTime << " ms" << endl;
+
+    cudaCheckErrors(cudaMemcpy(imgOutA, d_imgOutA, sizeof(float) * wid * hei, cudaMemcpyDeviceToHost));
+    cudaCheckErrors(cudaMemcpy(imgOutB, d_imgOutB, sizeof(float) * wid * hei, cudaMemcpyDeviceToHost));
 }
