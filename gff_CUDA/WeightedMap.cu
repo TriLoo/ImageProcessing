@@ -1,6 +1,10 @@
 #include "WeightedMap.h"
 
 #define GaussW 11
+#define GUIRAD_D 10
+#define GUIEPS_D 0.3
+#define GUIRAD_B 45
+#define GUIEPS_B 0.3
 
 WMap::WMap(int wid, int hei, int lr, int gr) : GFilter(wid, hei)
 {
@@ -327,8 +331,8 @@ void WMap::saliencymapTest(float *imgOut, float *imgIn, int wid, int hei, int lr
     cudaFree(d_imgOut);
 }
 
-void WMap::weightedmap(float *d_imgOutA, float *d_imgOutB, float *d_imgInA, float *d_imgInB, int wid, int hei, int lr,
-                       int gr, int gsigma, int guir, double eps)
+void WMap::weightedmap(float *d_imgOutA, float *d_imgOutB, float *d_imgOutC, float *d_imgOutD, float *d_imgInA,
+                       float *d_imgInB, int wid, int hei, int lr, int gr, int gsigma, int guir, double eps)
 {
     laplacianAbs(d_tempE_, d_imgInA, wid, hei, lr);
     laplacianAbs(d_tempF_, d_imgInB, wid, hei, lr);
@@ -350,14 +354,17 @@ void WMap::weightedmap(float *d_imgOutA, float *d_imgOutB, float *d_imgInA, floa
     gf.guidedfilter(d_imgOutA, d_imgInA, d_tempE_, wid, hei, guir, eps);
     gf.guidedfilter(d_imgOutB, d_imgInB, d_tempF_, wid, hei, guir, eps);
     */
-    guidedfilter(d_imgOutA, d_imgInA, d_tempE_, wid, hei, guir, eps);
-    guidedfilter(d_imgOutB, d_imgInB, d_tempF_, wid, hei, guir, eps);
+    guidedfilter(d_imgOutA, d_imgInA, d_tempE_, wid, hei, GUIRAD_D, GUIEPS_D);
+    guidedfilter(d_imgOutB, d_imgInA, d_tempE_, wid, hei, GUIRAD_B, GUIEPS_B);
+    guidedfilter(d_imgOutC, d_imgInB, d_tempF_, wid, hei, GUIRAD_D, GUIEPS_D);
+    guidedfilter(d_imgOutD, d_imgInB, d_tempF_, wid, hei, GUIRAD_B, GUIEPS_B);
+    //guidedfilter(d_imgOutB, d_imgInB, d_tempF_, wid, hei, guir * 2, eps / 100);
 
     cudaDeviceSynchronize();
 }
 
-void WMap::weightedmapTest(float *imgOutA, float *imgOutB, float *imgInA, float *imgInB, int wid, int hei, int lr,
-                           int gr, int gsigma, int guir, double eps)
+void WMap::weightedmapTest(float *imgOutA, float *imgOutB, float *imgInA, float *imgInB,
+                           int wid, int hei, int lr, int gr, int gsigma, int guir, double eps)
 {
     cudaEvent_t cudaStart, cudaStop;
 
@@ -375,7 +382,8 @@ void WMap::weightedmapTest(float *imgOutA, float *imgOutB, float *imgInA, float 
 
     cudaEventRecord(cudaStart, 0);
 
-    weightedmap(d_imgOutA, d_imgOutB, d_imgInA, d_imgInB, wid, hei, lr, gr, gsigma, guir, eps);
+    //weightedmap(d_imgOutA, d_imgOutB, d_imgInA, d_imgInB, wid, hei, lr, gr, gsigma, guir, eps);
+    weightedmap(d_imgOutA, d_imgOutB, d_imgOutA, d_imgOutB, d_imgInA, d_imgInB, wid, hei, lr, gr, gsigma, guir, eps);
 
     cudaEventRecord(cudaStop, 0);
     cudaEventSynchronize(cudaStop);

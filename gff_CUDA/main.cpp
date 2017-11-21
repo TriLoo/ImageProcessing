@@ -2,11 +2,12 @@
 //#include "BFilter.h"
 //#include "TwoScale.h"
 //#include "GFilter.h"
-#include "WeightedMap.h"
+//#include "WeightedMap.h"
+#include "gff.h"
 #include "chrono"
 
 #define TWOIMG
-//#undef TWOIMG
+#undef TWOIMG
 
 // BoxFilter Radius
 #define BFRAD 15
@@ -17,15 +18,18 @@
 #define GAUSIG 0.01
 // Guided Filter
 #define GFRAD 10
-#define GFEPS 0.1
+#define GFEPS 0.001
 
 int main() {
     std::cout << "Hello, World!" << std::endl;
 
     //Mat imgInA = imread("lena.jpg", IMREAD_COLOR);
-    Mat imgInA = imread("Visual.jpg", IMREAD_COLOR);
-    Mat imgInB = imread("Infrared.jpg", IMREAD_COLOR);
-    //Mat imgInA = imread("Infrared.jpg", IMREAD_COLOR);
+    //Mat imgInA = imread("Visual.jpg", IMREAD_COLOR);
+    //Mat imgInB = imread("Infrared.jpg", IMREAD_COLOR);
+    //Mat imgInA = imread("source20_1.tif", IMREAD_GRAYSCALE);
+    //Mat imgInB = imread("source20_2.tif", IMREAD_GRAYSCALE);
+    Mat imgInA = imread("Visual.jpg", IMREAD_GRAYSCALE);
+    Mat imgInB = imread("Infrared.jpg", IMREAD_GRAYSCALE);
     try
     {
         if(!imgInA.data || !imgInB.data)
@@ -38,8 +42,8 @@ int main() {
     }
 
     // convert input image to grayscale
-    cvtColor(imgInA, imgInA, COLOR_RGB2GRAY);
-    cvtColor(imgInB, imgInB, COLOR_RGB2GRAY);
+    //cvtColor(imgInA, imgInA, COLOR_RGB2GRAY);
+    //cvtColor(imgInB, imgInB, COLOR_RGB2GRAY);
     imshow("Input Image A", imgInA);
     imshow("Input Image B", imgInB);
 
@@ -63,7 +67,8 @@ int main() {
     //BFilter bf;
     //TwoScale ts;
     //GFilter gf(imgInA.cols, imgInA.rows);   // (wid, hei)
-    WMap wm(imgInA.cols, imgInA.rows, LAPRAD, GFRAD);
+    //WMap wm(imgInA.cols, imgInA.rows, LAPRAD, GFRAD);
+    GFF gff(imgInA.cols, imgInA.rows, LAPRAD, GFRAD);
 
     // Test
     // time calculation
@@ -75,13 +80,14 @@ int main() {
     //ts.twoscaleTest(imgOutA_P, imgOutB_P, imgInA_P, imgInA.cols, imgInA.rows, BFRAD);
     //gf.guidedfilterTest(imgOutA_P, imgInA_P, imgInA_P, imgInA.cols, imgInA.rows, GFRAD, GFEPS);
     //wm.saliencymapTest(imgOutA_P, imgInA_P, imgInA.cols, imgInA.rows, LAPRAD, GAURAD, GAUSIG);
-    wm.weightedmapTest(imgOutA_P, imgOutB_P, imgInA_P, imgInB_P, imgInA.cols, imgInA.rows, LAPRAD, GAURAD, GAUSIG, GFRAD, GFEPS);
+    //wm.weightedmapTest(imgOutA_P, imgOutB_P, imgInA_P, imgInB_P, imgInA.cols, imgInA.rows, LAPRAD, GAURAD, GAUSIG, GFRAD, GFEPS);
+    gff.gffFusionTest(imgOutA_P, imgInA_P, imgInB_P, imgInA.cols, imgInA.rows, 15, LAPRAD, GAURAD, GAUSIG, GFRAD, GFEPS);
 
     chrono::steady_clock::time_point stopPoint = chrono::steady_clock::now();
     chrono::duration<double> elapsedTime = chrono::duration_cast<chrono::duration<double>>(stopPoint - startPoint);
     cout << "Test Time : " << elapsedTime.count() * 1000.0 << " ms." << endl;
 
-    imgOutA.convertTo(imgOutA, CV_8UC1, 255.0);
+    imgOutA.convertTo(imgOutA, CV_8UC1, 1.0);
     imshow("Output Image H", imgOutA);
 #ifdef TWOIMG
     imgOutB.convertTo(imgOutB, CV_8UC1, 255.0);
