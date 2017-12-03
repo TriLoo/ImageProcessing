@@ -299,3 +299,9 @@ Author don't guarantee the codes are all right. Just be examples.
 	Moredetails can see : CUDA Examples.
 
 
+34. ./R-ADL-W_matlab
+
+	This dir include the first try of 'redundant adoptive-direction lifting wavelet' based on matlab.
+
+	seem work...
+
