@@ -1,0 +1,9 @@
+This directory include: 
+
+Image fusion based on Saliency Detection:
+
+1. Multi-scale decomposing : RLNSW
+2. Slaiency Detection	   : LapAbs + Gaussian
+3. Weighted Map			   : guided filter
+4. Multi-scale restore     : IRLNSW
+
