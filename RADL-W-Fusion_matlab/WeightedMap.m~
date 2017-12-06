@@ -1,0 +1,19 @@
+function [ S ] = WeightedMap( I, name )
+% -----------------------
+% Author : smh
+% Date   : 2017.12.06
+% Description:
+%       This file including the implementation of 'generation of weighted
+%       map' used in R-ADL-Wavelet.
+%   Inputs:
+%       I: A M * N * 2 matrix, stroing the input images
+%       name:
+%           'GOL': local saliency use Gaussian of Laplacian.
+
+% -----------------------
+
+
+
+
+end
+

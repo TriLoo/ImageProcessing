@@ -3,8 +3,8 @@ clear;
 close all;
 
 % Read images
-% imgA = imread('./datas/source20_1.tif');
-% imgB = imread('./datas/source20_2.tif');
+imgA = imread('./datas/source20_1.tif');
+imgB = imread('./datas/source20_2.tif');
 
 % imgA = imread('./datas/Jeep_IR.bmp');
 % imgB = imread('./datas/Jeep_Vis.bmp');
@@ -12,8 +12,8 @@ close all;
 % imgA = imread('./datas/Marne_24_IR.bmp');
 % imgB = imread('./datas/Marne_24_Vis.bmp');
 
-imgA = imread('./datas/LWIR-MarnehNew_15RGB_603.tif');
-imgB = imread('./datas/NIR-MarnehNew_15RGB_603.tif');
+% imgA = imread('./datas/LWIR-MarnehNew_15RGB_603.tif');
+% imgB = imread('./datas/NIR-MarnehNew_15RGB_603.tif');
 
 % imgA = imread('./datas/7422i.bmp');
 % imgB = imread('./datas/7422v.bmp');
@@ -27,13 +27,20 @@ imgB = im2double(imgB);
 [cA_A, cV_A, cH_A, cD_A, PB_A] = RADLWavelet(imgA);
 [cA_B, cV_B, cH_B, cD_B, PB_B] = RADLWavelet(imgB);
 
+% Generate Weighted Map
+I(:, :, 1) = imgA;
+I(:, :, 2) = imgB;
+[W_D, W_B] = WeightedMap(I, 'GOL');
 
-% Fusion
+% Fusion basing on Weighted Maps & decomposed Results.
 cA = (cA_A + cA_B) / 2;
 cV = (cV_A + cV_B) / 2;
 cH = (cH_A + cH_B) / 2;
 cD = (cD_A + cD_B) / 2;
-
+% cA = W_B(:, :, 1) .* cA_A + W_B(:, :, 2) .* cA_B;
+% cV = W_D(:, :, 1) .* cV_A + W_D(:, :, 2) .* cV_B;
+% cH = W_D(:, :, 1) .* cH_A + W_D(:, :, 2) .* cH_B;
+% cD = W_D(:, :, 1) .* cD_A + W_D(:, :, 2) .* cD_B;
 
 
 % Inverse RADLWavelet transform to get the fusion result.
