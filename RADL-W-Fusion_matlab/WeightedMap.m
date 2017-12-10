@@ -23,12 +23,20 @@ S(:, :, 2) = LocalGlobalSaliency(I(:, :, 2), name);
 P = IWconstruct(S);
 
 % Weight Optimization with Guided Filtering
-r1 = 45;
-eps1 = 0.3;
+r1 = 15;
+eps1 = 0.1;
 r2 = 7;
 eps2 = 10^-6;
 W_B = GuidOptimize(I, P, r1, eps1);
 W_D = GuidOptimize(I, P, r2, eps2);
+
+% B_t = W_B(:, :, 1) + W_B(:, :, 2);
+% W_B(:, :, 1) = W_B(:, :, 1) ./ B_t;
+% W_B(:, :, 2) = W_B(:, :, 2) ./ B_t;
+% 
+% D_t = W_D(:, :, 1) + W_D(:, :, 2);
+% W_D(:, :, 1) = W_D(:, :, 1) ./ D_t;
+% W_D(:, :, 2) = W_D(:, :, 2) ./ D_t;
 
 
 
@@ -46,7 +54,7 @@ end
 
 function [W] = GuidOptimize( I, P, r, eps)
 N = size(I,3);
-I = double(I)/255;
+% I = double(I)/255;
 for i=1:N
 P(:,:,i) = double(P(:,:,i));
 W(:,:,i) = guidedfilter(I(:,:,i), P(:,:,i), r, eps);

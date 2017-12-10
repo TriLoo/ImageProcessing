@@ -49,12 +49,12 @@ for i = rad + 1 : rad + M
     end
 end
 
-subplot(1, 2, 1);
-imshow(uint8(img * 225), []);
-title('Input Image');
-subplot(1, 2, 2);
-imshow(salCA, []);
-title('Saliency Map');
+% subplot(1, 2, 1);
+% imshow(uint8(img * 225), []);
+% title('Input Image');
+% subplot(1, 2, 2);
+% imshow(salCA, []);
+% title('Saliency Map');
 
 end
 

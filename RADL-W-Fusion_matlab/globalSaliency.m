@@ -29,7 +29,7 @@ for i = 1:m
 end
 
 maxVal = max(max(salGlobal));
-salGlobal = salGlobal / maxVal;
+salGlobal = double(salGlobal) / maxVal;
 
 
 % figure;
