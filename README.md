@@ -305,3 +305,9 @@ Author don't guarantee the codes are all right. Just be examples.
 
 	seem work...
 
+45. ./ TwoScaleSaliencyMap_Matlab
+
+	This dir include the impelementation of 'two-scale image fusion of visible & infrared images
+	 using saliency detection' 2016, Infrared Physics & Technology.
+
+	 copyright@GLPv2
