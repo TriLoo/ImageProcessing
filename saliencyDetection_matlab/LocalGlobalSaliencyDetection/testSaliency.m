@@ -1,0 +1,330 @@
+clc;
+clear;
+close all;
+
+% addpath ('/home/smher/myMatlab/RADLW_Saliency/FusionAssess/');
+
+totalNUM = 35;
+FA = cell(1, totalNUM);
+
+for pic = 1 : totalNUM
+    clear I
+    % Read images
+    switch pic
+        case 1
+    %         Group 1.
+            imgA = imread('../datas/source20_1.tif');
+            imgB = imread('../datas/source20_2.tif');
+        case 2
+    %         Group 2.
+            imgA = imread('../datas/Marne_04_IR.bmp');
+            imgB = imread('../datas/Marne_04_Vis.bmp');
+        case 3
+            % Group 3.
+            imgA = imread('../datas/LWIR-MarnehNew_15RGB_603.tif');
+            imgB = imread('../datas/NIR-MarnehNew_15RGB_603.tif');
+        case 4
+            % Group 4.
+            imgA = imread('../datas/7422i.bmp');
+            imgB = imread('../datas/7422v.bmp');
+        case 5
+            % Group 5.
+            imgA = imread('../datas/4916i.bmp');
+            imgB = imread('../datas/4916v.bmp');
+        case 6
+            % Group 6.
+            imgA = imread('../datas/Farm_IR.bmp');
+            imgB = imread('../datas/Farm_Vis.bmp');
+        case 7
+            % Group 7.
+            imgA = imread('../datas/img_00000.bmp');
+            imgB = imread('../datas/img_00001.bmp');
+            imgA = rgb2gray(imgA);
+        case 8
+            % Group 8.
+            imgA = imread('../datas/IR_meting003_g.bmp');
+            imgB = imread('../datas/VIS_meting003_r.bmp');
+        case 9
+            % Group 9.
+            imgA = imread('../datas/Marne_24_IR.bmp');
+            imgB = imread('../datas/Marne_24_Vis.bmp');
+        case 10
+            % Group 10.
+            imgA = imread('../datas/Reek_IR.bmp');
+            imgB = imread('../datas/Reek_Vis.bmp');
+        case 11
+            % Group 11.
+            imgA = imread('../datas/IR_18rad.bmp');
+            imgB = imread('../datas/VIS_18dhvR.bmp');
+        case 12
+            % Group 12.
+            imgA = imread('../datas/Kaptein_1123_IR.bmp');
+            imgB = imread('../datas/Kaptein_1123_Vis.bmp');
+        case 13
+            % Group 13.
+            imgA = imread('../datas/Kaptein_1654_IR.bmp');
+            imgB = imread('../datas/Kaptein_1654_Vis.bmp');
+        case 14
+            % Group 14.
+            imgA = imread('../datas/1_fk_ge_03_005.bmp');
+            imgB = imread('../datas/2_fk_ge_03_005.bmp');
+        case 15
+            imgA = imread('../datas/Balls_IR.bmp');
+            imgB = imread('../datas/Balls_Vis.bmp');
+        case 16
+            imgA = imread('../datas/LWIR.bmp');
+            imgB = imread('../datas/VIS.bmp');
+        case 17
+            imgA = imread('../datas/1827i.bmp');
+            imgB = imread('../datas/1827v.bmp');
+        case 18
+            imgA = imread('../datas/7416i.bmp');
+            imgB = imread('../datas/7416v.bmp');
+        case 19
+            imgA = imread('../datas/NIR.tif');
+            imgB = imread('../datas/VIS.tif');
+        case 20
+            imgA = imread('../datas/source17_1.tif');
+            imgB = imread('../datas/source17_2.tif');
+        case 21
+            imgA = imread('../datas/4906i.bmp');
+            imgB = imread('../datas/4906v.bmp');
+        case 22
+            imgA = imread('../datas/c_LWIR-MarnehNew_24RGB_1110.tif');
+            imgB = imread('../datas/a_VIS-MarnehNew_24RGB_1110.tif');
+        case 23
+            imgA = imread('../datas/HouseVIS.bmp');
+            imgB = imread('../datas/HouseNIR.bmp');
+        case 24
+            imgA = imread('../datas/IR_37rad.bmp');
+            imgB = imread('../datas/VIS_37dhvR.bmp');
+        case 25
+            imgA = imread('../datas/IR_163rad.bmp');
+            imgB = imread('../datas/VIS_163dhvR.BMP');
+        case 26
+            imgA = imread('../datas/IR_helib_011.bmp');
+            imgB = imread('../datas/VIS_helib_011.bmp');
+        case 27
+            imgA = imread('../datas/IR_meting012-1200_g.bmp');
+            imgB = imread('../datas/VIS_meting012-1200_r.bmp');
+        case 28
+            imgA = imread('../datas/IR_meting055_g.bmp');
+            imgB = imread('../datas/VIS_meting055_r.bmp');
+        case 29
+            imgA = imread('../datas/Marne_09_IR.bmp');
+            imgB = imread('../datas/Marne_09_Vis.bmp');
+        case 30
+            imgA = imread('../datas/Movie_18_IR.bmp');
+            imgB = imread('../datas/Movie_18_Vis.bmp');
+        case 31
+            imgA = imread('../datas/Jeep_IR.bmp');
+            imgB = imread('../datas/Jeep_Vis.bmp');
+        case 32
+            imgA = imread('../datas/IR_fk_06_005.bmp');
+            imgB = imread('../datas/VIS_fk_06_005.bmp');
+        case 33
+            imgA = imread('../datas/source22_1.tif');
+            imgB = imread('../datas/source22_2.tif');
+        case 34
+            imgA = imread('../datas/TankLWIR.tif');
+            imgB = imread('../datas/TankVis.tif');
+        case 35
+            imgA = imread('../datas/IR_lake_g.bmp');
+            imgB = imread('../datas/VIS_lake_r.bmp');
+        case 36
+            imgA = imread('../datas/Jeep_IR.bmp');
+            imgB = imread('../datas/Jeep_Vis.bmp');
+        case 37
+            imgA = imread('../datas/source17_1.tif');
+            imgB = imread('../datas/source17_2.tif');
+        case 38
+            imgA = imread('../datas/source17_1.tif');
+            imgB = imread('../datas/source17_2.tif');
+        case 39
+            imgA = imread('../datas/source17_1.tif');
+            imgB = imread('../datas/source17_2.tif');
+        case 40
+            imgA = imread('../datas/source17_1.tif');
+            imgB = imread('../datas/source17_2.tif');
+        case 41
+            imgA = imread('../datas/source17_1.tif');
+            imgB = imread('../datas/source17_2.tif');
+        otherwise
+            error('Input 1 ~ 20 please.');
+    end
+    
+    if(size(imgA, 3) == 3)
+        imgA = rgb2gray(imgA);
+    end
+    if(size(imgB, 3) == 3)
+        imgB = rgb2gray(imgB);
+    end
+    
+%     imgA = im2double(imgA);
+%     imgB = im2double(imgB);
+    imgA = double(imgA);
+    imgB = double(imgB);
+    
+    I(:, :, 1) = imgA;
+    I(:, :, 2) = imgB;
+    
+    salA_local = localSaliency(imgA);
+    salA_global = globalSaliency(imgA);
+    salA_gol = LocalGlobalSaliency(imgA, 'GOL');
+    salA_ca = LocalGlobalSaliency(imgA, 'CA');
+    
+    salB_local = localSaliency(imgB);
+    salB_global = globalSaliency(imgB);
+    salB_gol = LocalGlobalSaliency(imgB, 'GOL');
+    salB_ca = LocalGlobalSaliency(imgB, 'CA');
+    
+    [W_D, W_B] = WeightedMap(I, 'GOL');
+    
+    D_t = W_D(:, :, 1) + W_D(:, :, 2);
+    B_t = W_B(:, :, 1) + W_B(:, :, 2);
+    
+    
+    
+    subplot(2, 6, 1);
+    imshow(imgA, []);
+    title('Input A');
+
+    subplot(2, 6, 2);
+    imshow(salA_local, []);
+    title('salA local A');
+
+    subplot(2, 6, 3);
+    imshow(salA_global, []);
+    title('salA global A');
+
+    subplot(2, 6, 4);
+    imshow(salA_gol, []);
+    title('salA gol A');
+
+    subplot(2, 6, 5);
+    imshow(salA_ca, []);
+    title('salA ca A');
+
+    subplot(2, 6, 6);
+%     imshow(D_t, []);
+    imshow(W_B(:, :, 1), []);
+    title('WB A');
+
+    subplot(2, 6, 7);
+    imshow(imgB, []);
+    title('Input B');
+
+    subplot(2, 6, 8);
+    imshow(salB_local, []);
+    title('salB local B');
+
+    subplot(2, 6, 9);
+    imshow(salB_global, []);
+    title('salB global B');
+
+    subplot(2, 6, 10);
+    imshow(salB_gol, []);
+    title('salB gol B');
+
+    subplot(2, 6, 11);
+    imshow(salB_ca, []);
+    title('salB ca B');
+
+    subplot(2, 6, 12);
+%     imshow(B_t, []);
+    imshow(W_B(:, :, 2), []);
+    title('WB B');
+
+
+%     switch pic
+%         case 1
+%             imwrite(imgRes, './results/source20.jpg');
+%         case 2
+%             imwrite(imgRes, './results/Marne_04.jpg');
+%         case 3
+%             imwrite(imgRes, './results/MarnehNew_15RGB_603.jpg');
+%         case 4
+%             imwrite(imgRes, './results/7422.jpg');
+%         case 5
+%             imwrite(imgRes, './results/4916.jpg');
+%         case 6
+%             imwrite(imgRes, './results/Farm.jpg');
+%         case 7
+%             imwrite(imgRes, './results/img_00000.jpg');
+%         case 8
+%             imwrite(imgRes, './results/meting003.jpg');
+%         case 9
+%             imwrite(imgRes, './results/Marne_24.jpg');
+%         case 10
+%             imwrite(imgRes, './results/Reek.jpg');
+%         case 11
+%             imwrite(imgRes, './results/18rad.jpg');
+%         case 12
+%             imwrite(imgRes, './results/Kaptein_1123.jpg');
+%         case 13
+%             imwrite(imgRes, './results/Kaptein_1654.jpg');
+%         case 14
+%             imwrite(imgRes, './results/fk_ge_03_005.jpg');
+%         case 15
+%             imwrite(imgRes, './results/Balls.jpg');
+%         case 16
+%             imwrite(imgRes, './results/ThreeMen.jpg');
+%         case 17
+%             imwrite(imgRes, './results/1827.jpg');
+%         case 18
+%             imwrite(imgRes, './results/7416.jpg');
+%         case 19
+%             imwrite(imgRes, './results/House1.jpg');
+%         case 20
+%             imwrite(imgRes, './results/source17.jpg');
+%         case 21
+%             imwrite(imgRes, './results/4096.jpg');
+%         case 22
+%             imwrite(imgRes, './results/LWIR-MarnehNew_24RGB_1110.jpg');
+%         case 23
+%             imwrite(imgRes, './results/House2.jpg');
+%         case 24
+%             imwrite(imgRes, './results/37road.jpg');
+%         case 25
+%             imwrite(imgRes, './results/163rad.jpg');
+%         case 26
+%             imwrite(imgRes, './results/helib_011.jpg');
+%         case 27
+%             imwrite(imgRes, './results/meting012-1200.jpg');
+%         case 28
+%             imwrite(imgRes, './results/meting055.jpg');
+%         case 29
+%             imwrite(imgRes, './results/Marne_09.jpg');
+%         case 30
+%             imwrite(imgRes, './results/Movie_18.jpg');
+%         case 31
+%             imwrite(imgRes, './results/Jeep.jpg');
+%         case 32
+%             imwrite(imgRes, './results/Tank1.jpg');
+%         case 33
+%             imwrite(imgRes, './results/source22.jpg');
+%         case 34
+%             imwrite(imgRes, './results/Tank2.jpg');
+%         case 35
+%             imwrite(imgRes, './results/lake1.jpg');
+%         case 36
+%             imwrite(imgRes, './results/Jeep.jpg');
+%         case 37
+%             imwrite(imgRes, './results/source17.jpg');
+%         case 38
+%             imwrite(imgRes, './results/source17.jpg');
+%         case 39
+%             imwrite(imgRes, './results/source17.jpg');
+%         case 40
+%             imwrite(imgRes, './results/source17.jpg');
+%         case 41
+%             imwrite(imgRes, './results/source17.jpg');
+%         otherwise
+%             error('Not correct selection.');
+%     end
+    
+    fprintf('\r\n %d -th image done.\r\n', pic);
+
+end
+
+disp 'done.!'
