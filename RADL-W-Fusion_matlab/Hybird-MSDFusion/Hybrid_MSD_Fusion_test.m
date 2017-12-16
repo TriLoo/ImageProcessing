@@ -23,7 +23,7 @@ nLevel = 4;
 lambda = 30;  % lambda = 3000
 %% ************************************************************************
 
-% path_Vis = './image/Camp_Vis.jpg';      path_IR = './image/Camp_IR.jpg';
+path_Vis = './image/Camp_Vis.jpg';      path_IR = './image/Camp_IR.jpg';
 % path_Vis = './image/Trees4917_Vis.jpg'; path_IR = './image/Trees4917_IR.jpg';
 % path_Vis = './image/Octec_Vis.jpg';     path_IR = './image/Octec_IR.jpg';
 % path_Vis = './image/Road_Vis.jpg';      path_IR = './image/Road_IR.jpg';

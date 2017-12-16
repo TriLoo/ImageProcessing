@@ -2,14 +2,24 @@ clc;
 clear;
 close all;
 
+% add fusion assessment files
 addpath ('/home/smher/myMatlab/RADLW_Saliency/FusionAssess/');
-addpath ('./Image-fusion-with-VSM-and-WLS/');
+
+% add algorithms
+addpath ('./RADLW_S/');                            % our method
+% addpath ('./GFF_1.0/');                          % method -1
+% addpath ('./TwoScaleSaliencyDetection2016/');    % method -2
+% addpath ('./');                                % method -3, yet no source
+% code
+% addpath ('./Image-fusion-with-VSM-and-WLS/');    % method -4(VSM + WLS)
+% addpath ('./Hybird-MSDFusion/');                 % method -5(Hybrid - MSD)
+% addpath ('./FuseTools/')                           % method -6(DWT)
 
 totalNUM = 35;
 FA = cell(1, totalNUM);
 
 for pic = 1 : totalNUM
-    clear I
+    clear I;
     % Read images
     switch pic
         case 1
@@ -151,7 +161,7 @@ for pic = 1 : totalNUM
             imgA = imread('./datas/source17_1.tif');
             imgB = imread('./datas/source17_2.tif');
         otherwise
-            error('Input 1 ~ 20 please.');
+            error('Input 1 ~ 35 please.');
     end
     
     if(size(imgA, 3) == 3)
@@ -169,8 +179,10 @@ for pic = 1 : totalNUM
 
     % Fusion two input images
     imgRes = RADLW_Fusion(imgA, imgB);    % my algorithms
-%     imgRes = GFF(I, 45, 0.3, 7, 10^(-6));
+%     imgRes = GFF(imgA, imgB);
+%     imgRes = imageFusion(imgA, imgB);
 %     imgRes = WLS_Fusion(imgA, imgB);
+%     imgRes = HybridMSDFusion(imgA, imgB);
 
     imgA = im2uint8(imgA);
     imgB = im2uint8(imgB);
@@ -236,13 +248,13 @@ for pic = 1 : totalNUM
         case 21
             imwrite(imgRes, './results/4096.jpg');
         case 22
-            imwrite(imgRes, './results/LWIR-MarnehNew_24RGB_1110.jpg');
+            imwrite(imgRes, './results/MarnehNew_24RGB_1110.jpg');
         case 23
             imwrite(imgRes, './results/House2.jpg');
         case 24
             imwrite(imgRes, './results/37road.jpg');
         case 25
-            imwrite(imgRes, './results/163rad.jpg');
+            imwrite(imgRes, './results/163road.jpg');
         case 26
             imwrite(imgRes, './results/helib_011.jpg');
         case 27
