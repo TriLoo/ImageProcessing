@@ -31,11 +31,11 @@ end
 level = length(deltaS);
 res = zeros(M, N, level+1);
 C = ones(size(img));
-for i = 1 : level
+for i = 1 : level + 1
     if i == 1      % Small structure removal
         res(:, :, i) = JBF(C, img, rad, deltaS(i), deltaR);
     else           % Edge Recovery
-        res(:, :, i) = JBF(res(:, :, i-1), img, rad, deltaS(i), deltaR);  % Use a blurry image to guide filtering
+        res(:, :, i) = JBF(res(:, :, i-1), img, rad, deltaS(i-1), deltaR);  % Use a blurry image to guide filtering
     end
 end
 
