@@ -311,3 +311,10 @@ Author don't guarantee the codes are all right. Just be examples.
 	 using saliency detection' 2016, Infrared Physics & Technology.
 
 	 copyright@GLPv2
+
+36. ./ RGF_matlab
+	
+	This dir include the implemenentation of 'rolling guidance filter' based on Matlab.
+
+	But speed is not fast and results may be wrong.
+
