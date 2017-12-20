@@ -318,3 +318,11 @@ Author don't guarantee the codes are all right. Just be examples.
 
 	But speed is not fast and results may be wrong.
 
+
+37. ./ JointBilateralFilter_opencv
+
+	This dir include the implementation of 'Joint bilateral Filter' based on 'Rolling Guidance Filter'
+
+	and 'Guided Image Filter'.
+
+
