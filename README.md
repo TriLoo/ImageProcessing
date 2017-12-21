@@ -305,7 +305,7 @@ Author don't guarantee the codes are all right. Just be examples.
 
 	seem work...
 
-45. ./ TwoScaleSaliencyMap_Matlab
+35. ./ TwoScaleSaliencyMap_Matlab
 
 	This dir include the impelementation of 'two-scale image fusion of visible & infrared images
 	 using saliency detection' 2016, Infrared Physics & Technology.
@@ -325,4 +325,9 @@ Author don't guarantee the codes are all right. Just be examples.
 
 	and 'Guided Image Filter'.
 
+38. ./ RGF_opencv
+
+	This dir include the implementation of 'Rolling Guidance Filter' based on 'Rolloing Guidance Filter'.
+
+	Support single channel and color image inputs.
 

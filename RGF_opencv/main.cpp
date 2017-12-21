@@ -52,7 +52,10 @@ int main() {
     imshow("RGF Result", imgOut);
     waitKey(0);
 
-    /*
+    /*    // All work
+    Mat_<float> test(3, 3);
+    test << 1, 2, 3, 4, 5, 6, 6, 7, 8;
+    cout << test << endl;
     Mat test = (Mat_<float>(3, 3) << 1, 2, 3, 4, 5, 6, 7, 8, 9);
     cout << test << endl;
     Mat_<float> test(3, 3);

@@ -22,6 +22,10 @@ private:
     void JBFSingleChannel(cv::Mat &imgOut, const cv::Mat &imgInI, const cv::Mat &imgInP);
     void JBFColor(cv::Mat &imgOut, const cv::Mat &imgInI, const cv::Mat &imgInP);
 
+    // mg: meshgrid, the output
+    // rg: the range (element) of output(mg)
+    void meshgrid(cv::Range rg, cv::Mat &mg);
+
     T calSumMat(cv::Mat &Ins);
 
 protected:
@@ -56,6 +60,15 @@ void JBF<T>::jointBilateralFilter(cv::Mat &imgOut, const cv::Mat &imgInI, const 
         JBFSingleChannel(imgOut, imgInI, imgInP);
     else
         JBFColor(imgOut, imgInI, imgInP);
+}
+
+template <typename T>
+void JBF<T>::meshgrid(cv::Range rg, cv::Mat &mg)
+{
+    std::vector<int> x(0);
+    for(int i = rg.start; i <= rg.end; ++i)
+        x.push_back(i);
+    cv::repeat(cv::Mat(x).t(), x.size(), 1, mg);
 }
 
 template <typename T>      // T can be uint or float
@@ -119,6 +132,8 @@ void JBF<T>::JBFColor(cv::Mat &imgOut, const cv::Mat &imgInI, const cv::Mat &img
     // for debug
     // std::cout << "Step 0 Success." << std::endl;
 
+    // can use cv::repeat to realize 'meshgrid' in matlab
+    //
     int row = imgInI.rows, col = imgInI.cols;
     cv::Mat gs = cv::Mat_<cv::Vec3f>(len, len);
     double tempVal = 0.0;
