@@ -14,7 +14,7 @@ end
 if ~exist('rad', 'var')
     rad = [5, 5, 5];
     sig = [1, 1, 1];
-    eps = [0.01, 0.02, 0.04];
+    eps = [0.04, 0.02, 0.01];
     level = 3;
 end
 
@@ -31,13 +31,27 @@ if isa(img, 'uint8')
 end
 
 C = ones(size(img));
-res = cell(level, 1);
+res = cell(level + 1, 1);
+
+% tempImg = zeros(size(img));
+se = fspecial('gaussian', 11, 5);
 
 for i = 1 : level
     if i == 1
-        res{i} = guidedfilter(C, img, rad(i), sig(i), eps(i));                          % Get the base layers
+        res{i} = imfilter(img, se);                                  % Get the base layers
+%         res{i} = guidedfilter(C, img, rad(i), sig(i), eps(i));                         
     else
-        res{i} = res{i - 1} - guidedfilter(res{i - 1}, img, rad(i), sig(i), eps(i));    % Get the detail layers
+        res{i} = guidedfilter(res{i - 1}, img, rad(i), sig(i), eps(i));    % Get the detail layers
+    end
+end
+
+% len = length(res);
+
+for i = level : -1 : 1
+    if i == 1
+        res{i+1} = img - res{i};
+    else
+        res{i + 1} = res{i-1} - res{i};
     end
 end
 

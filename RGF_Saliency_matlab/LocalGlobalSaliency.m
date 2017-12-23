@@ -31,7 +31,7 @@ end
 
 close all;
 % the first processing method: simply add two saliency map.
-c = 0.9;
+c = 1;
 salLocalGlobal = c * SalLocal + (1 - c) * SalGlobal;
 
 % the processing method used in 'Saliency Filter: Contrast Based Filtering
