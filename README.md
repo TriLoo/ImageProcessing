@@ -331,3 +331,8 @@ Author don't guarantee the codes are all right. Just be examples.
 
 	Support single channel and color image inputs.
 
+39. ./ RGF_Saliency_matlab
+
+	This dir includes the implementation of 'Image Fusion based on Rolling Guidance Filter'.
+
+	But, not work, the fusion result is not good at all.
