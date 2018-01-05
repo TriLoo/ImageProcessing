@@ -336,3 +336,9 @@ Author don't guarantee the codes are all right. Just be examples.
 	This dir includes the implementation of 'Image Fusion based on Rolling Guidance Filter'.
 
 	But, not work, the fusion result is not good at all.
+
+40. ./ ZJF2015_matlab
+
+	This dir includes the implementation of "Fusion for visible and infrared images using visual weight analysis and bilateral filter based multi scale decomposition"
+
+	Parameters should be further optimized.
