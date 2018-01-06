@@ -1,4 +1,4 @@
-function [ res ] = RGFFusion( imgA, imgB)
+function [ res, ent ] = RGFFusion( imgA, imgB)
 % ----------------------------
 % Author : smh
 % Date   : 2018.01.05
@@ -7,7 +7,7 @@ function [ res ] = RGFFusion( imgA, imgB)
 % ----------------------------
 
 [M, N] = size(imgA);
-res = zeros(M, N);
+% res = zeros(M, N);
 
 layerA = RGF(imgA);
 layerB = RGF(imgB);
@@ -22,8 +22,15 @@ for i = 1 : len
     temp(:, :, i) = (layerA(:, :, i) .* wmA + layerB(:, :, i) .* (1 - wmA) + layerA(:, :, i) .* (1 - wmB) + layerB(:, :, i) .* wmB) / 2; 
 end
 
-weights = [1.5, 1.1, 0.6, 0.3];
+weights = [1.1, 0.6, 0.3, 1.5];
 res = inverseRGF(temp, weights);
+
+resMin = min(min(res));
+resMax = max(max(res));
+
+res = (res - resMin) / (resMax - resMin);
+
+ent = entropy(im2uint8(res));
 
 end
 

@@ -11,7 +11,7 @@ len = size(layers, 3);
 
 res = zeros(M, N);
 for i = 1 : len
-    res = res + layers(i) * weights(i);
+    res = res + layers(:, :, i) * weights(i);
 end
 
 end

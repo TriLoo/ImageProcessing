@@ -24,25 +24,25 @@ function [ res ] = RGF( img, rad, deltaS, deltaR)
 % lve ...
 
 if nargin == 1
-    rad = 15;
+    rad = 7;
     deltaS = 12;
     deltaR = [0.02, 0.08, 0.15];
 end
 
 if ~exist('deltaS', 'var')
-    deltaS = [4, 4, 4];
-    deltaR = 0.1;
+    deltaS = 12;
+    deltaR = [0.02, 0.08, 0.15];
 end
 
 level = length(deltaR);
 temp = zeros(M, N, level+1);
 res = zeros(M, N, level+1);
 % C = ones(size(img));
-for i = 1 : level + 1
+for i = 1 : level
     if i == 1      % Small structure removal
         temp(:, :, i) = JBF(img, img, rad, deltaS, deltaR(i));
     else           % Edge Recovery
-        temp(:, :, i) = JBF(img, img, rad, deltaS, deltaR(i-1));  % Use a blurry image to guide filtering
+        temp(:, :, i) = JBF(img, img, rad, deltaS, deltaR(i));  % Use a blurry image to guide filtering
     end
 end
 
@@ -54,7 +54,7 @@ for i = 1 : level
     end 
 end
 
-res(:, :, level+1) = temp(:, :, level + 1);
+res(:, :, level+1) = temp(:, :, level);
 
 end
 

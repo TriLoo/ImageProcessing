@@ -7,9 +7,9 @@ function [ sal ] = localSal( img, rad, delta1, delta2 )
 % ----------------------
 
 if nargin == 1
-    rad = 11;
+    rad = 7;
     delta1 = 3;
-    delta2 = 1;
+    delta2 = 0.5;
 end
 
 se1= fspecial('gaussian', rad, delta1);
