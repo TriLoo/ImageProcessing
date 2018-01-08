@@ -8,7 +8,7 @@ include_directories(${OpenCV_INC_DIRS})
 
 find_package(Boost REQUIRED COMPONENTS system thread)
 
-set(SOURCE_FILES main.cpp)
+set(SOURCE_FILES main.cpp RDL_Wavelet.cpp)
 add_executable(RDL_Wavelet ${SOURCE_FILES})
 
 #message(STATUS ${Boost_LIBRARIES})
