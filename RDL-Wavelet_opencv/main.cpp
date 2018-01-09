@@ -16,16 +16,30 @@ int main() {
     // convert the input image to float
     imgIn.convertTo(imgIn, CV_32F, 1.0/255);
 
+    /*
+    for (int i = 0; i < 10; ++i)
+    {
+        for (int j = 0; j < 10; ++j)
+            cout << imgIn.at<float>(i,j) << ", ";
+        cout << endl;
+    }
+    cout << "--------------------------" << endl;
+    */
+
     // prepare output vector
     vector<Mat> imgOuts(0);
-
     RDLWavelet(imgOuts, imgIn);
 
     // for test
     Mat tempMat;
-    imgOuts[0].convertTo(tempMat, CV_8UC1, 255);
+    imgOuts[1].convertTo(tempMat, CV_8UC1, 255);
+    //normalize(imgOuts[0], tempMat, 0.0, 255.0, NORM_MINMAX);
+    //tempMat.convertTo(tempMat, CV_8UC1, 1.0);
+    imwrite("Output.jpg", tempMat);
     imshow("Output", tempMat);
-    cout << "Output = " << tempMat.rows << " * " << tempMat.cols << endl;
+    //cout << tempMat.cols << endl;
+    cout << "Size = " << imgOuts.size() << endl;
+    cout << "Output = " << tempMat.rows << " * " ; cout <<  tempMat.cols << endl;
 
     waitKey(0);
 

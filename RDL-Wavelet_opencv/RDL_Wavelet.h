@@ -9,6 +9,18 @@
 
 #include "headers.h"
 
+class RDLWavelet
+{
+public:
+    RDLWavelet() = default;
+    virtual ~RDLWavelet() = default;
+
+    void RdlWavelet(std::vector<cv::Mat>& imgOuts, const cv::Mat& imgIn);
+private:
+    void Horizontal_Predict(cv::Mat& imgOut, const cv::Mat& imgIn);
+    void Horizontal_Update(cv::Mat& imgOut, const cv::Mat& imgIn);
+};
+
 void RDLWavelet(std::vector<cv::Mat> &imgOuts, const cv::Mat& imgIn);
 void SincInterpolation(cv::Mat& imgOut, cv::Mat& imgIn);
 
