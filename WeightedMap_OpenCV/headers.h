@@ -9,6 +9,7 @@
 #include "vector"
 #include "cassert"
 #include "stdexcept"
+#include "memory"
 
 #include "opencv2/imgproc.hpp"
 #include "opencv2/highgui.hpp"
