@@ -11,6 +11,7 @@ class WeightedMap
 {
 public:
     WeightedMap() = default;
+    WeightedMap(int r, int c);
     ~WeightedMap();
 
     void weightedmap(cv::Mat& wmBase, cv::Mat& wmDetail, std::vector<cv::Mat>& imgIns);
@@ -23,14 +24,15 @@ public:
         GuiEps_ = ge;       // eps in guided filter
     }
 private:
-    void guidedfilter(cv::Mat& imgOut, const cv::Mat& imgInI, const cv::Mat& imgInP, int rad, int eps);
-    void localsaliency(cv::Mat& sal, const cv::Mat& imgIn, int AvgRad, int GauRad, double GauSig);
-    void globalsaliency(cv::Mat& imgOut, cv::Mat& imgIn);
+    void guidedfilter(cv::Mat& imgOut, const cv::Mat& imgInI, const cv::Mat& imgInP);
+    void localsaliency(cv::Mat& sal, const cv::Mat& imgIn);
+    void globalsaliency(cv::Mat& imgOut, const cv::Mat& imgIn);
     void hcsingle(cv::Mat& imgOut, const cv::Mat& imgIn);
     //std::shared_ptr<WeightedMapImpl> pImpl;
 
     int GuiRad_, AvgRad_, GauRad_;
     double GauSig_, GuiEps_;
+    int row_, col_;
 };
 
 #endif //WEIGHTEDMAP_WEIGHTEDMAP_H
