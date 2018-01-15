@@ -15,12 +15,6 @@ WeightedMap::~WeightedMap()
 {
 }
 
-// calculate the histogram of single channel image
-void WeightedMap::hcsingle(cv::Mat &imgOut, const cv::Mat &imgIn)
-{
-
-}
-
 // calculation of global saliency map
 void WeightedMap::globalsaliency(cv::Mat &imgOut, const cv::Mat &imgIn)
 {
@@ -83,14 +77,78 @@ void WeightedMap::localsaliency(cv::Mat &sal, const cv::Mat &imgIn)
     sal = AvgMat;
 }
 
-// calculation of guided filter
-void WeightedMap::guidedfilter(cv::Mat &imgOut, const cv::Mat &imgInI, const cv::Mat &imgInP)
+// calculation of final saliency map
+void WeightedMap::saliencydetection(cv::Mat &sal, const cv::Mat &imgIn)
 {
+    Mat localSal, globalSal;
+    localsaliency(localSal, imgIn);
+    globalsaliency(globalSal, imgIn);
+
+    sal = c_ * localSal + (1 - c_) * globalSal;
+}
+
+// calculation of guided filter, single channel
+void WeightedMap::guidedfilter(cv::Mat &imgOut, const cv::Mat &imgInI, const cv::Mat &imgInP, int rad, double eps)
+{
+    assert(imgInI.channels() == 1);      // grayscale input
+
+    Mat meanI, meanP, corrI, corrIp;
+
+    // Step 1 in Algorithm 1
+    boxFilter(imgInI, meanI, imgInI.depth(), Size(rad, rad));
+    boxFilter(imgInP, meanP, imgInP.depth(), Size(rad, rad));
+    boxFilter(imgInI.mul(imgInI), corrI, imgInI.depth(), Size(rad, rad));
+    boxFilter(imgInI.mul(imgInP), corrIp, imgInI.depth(), Size(rad, rad));
+
+    // Step 2 in Algorithm 1
+    Mat varI = corrI - meanI.mul(meanI);
+    Mat covIp = corrIp - meanI.mul(meanP);
+
+    // Step 3 in Algorithm 1
+    Mat a = covIp / (varI + eps);
+    Mat b = meanP - a.mul(meanI);
+
+    // Step 4
+    boxFilter(a, meanI, a.depth(), Size(rad, rad));    // meanI --> meanA
+    boxFilter(b, meanP, b.depth(), Size(rad, rad));    // meanP --> meanB
+
+    // Step 5
+    imgOut = meanI.mul(imgInI) + meanP;
 }
 
 // calculation of weighted map
-void WeightedMap::weightedmap(cv::Mat &wmBase, cv::Mat &wmDetail, std::vector<cv::Mat> &imgIns)
+void WeightedMap::weightedmap(std::vector<cv::Mat> &wmBase, std::vector<cv::Mat> &wmDetail, std::vector<cv::Mat> &imgIns)
 {
+    wmBase.clear();
+    wmDetail.clear();
 
+    Mat salA, salB;
+    saliencydetection(salA, imgIns[0]);
+    saliencydetection(salB, imgIns[1]);
+
+    Mat salMapA, salMapB;
+    salMapA = salA >= salB;
+    salMapB = salB > salA;
+
+    normalize(salMapA, salMapA, 0, 1, NORM_MINMAX);
+    normalize(salMapB, salMapB, 0, 1, NORM_MINMAX);
+
+    int r1 = 30, r2 = 7;
+    double eps1 = 10^(-4), eps2 = 10^(-6);
+
+    Mat wmA, wmB, tempMat;
+    // base layer
+    guidedfilter(wmA, imgIns[0], salMapA, r1, eps1);
+    guidedfilter(wmB, imgIns[1], salMapB, r1, eps1);
+    tempMat = wmA + wmB;
+    wmBase.push_back(wmA / tempMat);
+    wmBase.push_back(wmB / tempMat);
+
+    // detail layers
+    guidedfilter(wmA, imgIns[0], salMapA, r2, eps2);
+    guidedfilter(wmB, imgIns[1], salMapB, r2, eps2);
+    tempMat = wmA + wmB;
+    wmDetail.push_back(wmA / tempMat);
+    wmDetail.push_back(wmB / tempMat);
 }
 
