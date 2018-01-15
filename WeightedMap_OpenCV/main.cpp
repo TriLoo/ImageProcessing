@@ -12,6 +12,15 @@ int main() {
     assert(imgA.empty() != true);
     assert(imgB.empty() != true);
 
+    imgA.convertTo(imgA, CV_32F, 1.0 / 255);
+    imgB.convertTo(imgB, CV_32F, 1.0 / 255);
+
+    // for test
+    cout << CV_32F << endl;
+    cout << CV_32FC1 << endl;
+    cout << CV_32FC3 << endl;
+    cout << CV_8UC1 << endl;
+
     const int row = imgA.rows;
     const int col = imgA.cols;
 
@@ -26,8 +35,9 @@ int main() {
     wm.weightedmap(baseWM, detailWM, imgIns);
 
     assert(baseWM.size() == 2);
-    Mat tempMat = baseWM[0];
-    normalize(tempMat, tempMat, 0, 255, NORM_MINMAX);
+    //Mat tempMat = baseWM[1];
+    Mat tempMat = detailWM[1];
+    //normalize(tempMat, tempMat, 0, 255, NORM_MINMAX);
 
     imshow("Output", tempMat);
 

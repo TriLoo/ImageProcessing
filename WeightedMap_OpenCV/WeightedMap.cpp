@@ -7,6 +7,17 @@
 using namespace std;
 using namespace cv;
 
+void imgShow(Mat& img)
+{
+    imshow("Eva", img);
+    waitKey(0);
+}
+void imgShow(Mat&& img)
+{
+    imshow("Eva", img);
+    waitKey(0);
+}
+
 WeightedMap::WeightedMap(int r, int c) : row_(r), col_(c)
 {
 }
@@ -35,7 +46,7 @@ void WeightedMap::globalsaliency(cv::Mat &imgOut, const cv::Mat &imgIn)
 
     //cv::Mat hist = cv::Mat_<int>(dims, 1, 0);
     cv::Mat hist;
-    cv::calcHist(&imgIn, 1, 0, cv::Mat(), hist, 1, histSize, histRange, uniform, accumulate);
+    cv::calcHist(&imgTemp, 1, 0, cv::Mat(), hist, 1, histSize, histRange, uniform, accumulate);
 
     hist /= Kfactor;
 
@@ -52,7 +63,7 @@ void WeightedMap::globalsaliency(cv::Mat &imgOut, const cv::Mat &imgIn)
         lut.at<float>(i) = tempSum;
     }
 
-    cv::LUT(imgIn, lut, imgOut);
+    cv::LUT(imgTemp, lut, imgOut);
     cv::normalize(imgOut, imgOut, 0, 1, CV_MINMAX);
 }
 
@@ -99,14 +110,22 @@ void WeightedMap::guidedfilter(cv::Mat &imgOut, const cv::Mat &imgInI, const cv:
     boxFilter(imgInP, meanP, imgInP.depth(), Size(rad, rad));
     boxFilter(imgInI.mul(imgInI), corrI, imgInI.depth(), Size(rad, rad));
     boxFilter(imgInI.mul(imgInP), corrIp, imgInI.depth(), Size(rad, rad));
+    //assert(imgInI.type() == imgInP.type());
+    //cout << imgInI.depth() << endl;
+    //cout << imgInP.depth() << endl;
+    //cout << "Success 3.0." << endl;
 
     // Step 2 in Algorithm 1
     Mat varI = corrI - meanI.mul(meanI);
     Mat covIp = corrIp - meanI.mul(meanP);
 
+    //cout << "Success 3.1." << endl;
+
     // Step 3 in Algorithm 1
     Mat a = covIp / (varI + eps);
     Mat b = meanP - a.mul(meanI);
+
+    //cout << "Success 3.2." << endl;
 
     // Step 4
     boxFilter(a, meanI, a.depth(), Size(rad, rad));    // meanI --> meanA
@@ -122,16 +141,24 @@ void WeightedMap::weightedmap(std::vector<cv::Mat> &wmBase, std::vector<cv::Mat>
     wmBase.clear();
     wmDetail.clear();
 
+    //cout << "Success 1." << endl;
+
     Mat salA, salB;
     saliencydetection(salA, imgIns[0]);
     saliencydetection(salB, imgIns[1]);
+
+    //cout << "Success 2." << endl;
 
     Mat salMapA, salMapB;
     salMapA = salA >= salB;
     salMapB = salB > salA;
 
-    normalize(salMapA, salMapA, 0, 1, NORM_MINMAX);
-    normalize(salMapB, salMapB, 0, 1, NORM_MINMAX);
+    //normalize(salMapA, salMapA, 0, 1, NORM_MINMAX);
+    //normalize(salMapB, salMapB, 0, 1, NORM_MINMAX);
+    salMapA.convertTo(salMapA, CV_32F, 1.0/255);
+    salMapB.convertTo(salMapB, CV_32F, 1.0/255);
+
+    //cout << "Success 3." << endl;
 
     int r1 = 30, r2 = 7;
     double eps1 = 10^(-4), eps2 = 10^(-6);
@@ -144,11 +171,18 @@ void WeightedMap::weightedmap(std::vector<cv::Mat> &wmBase, std::vector<cv::Mat>
     wmBase.push_back(wmA / tempMat);
     wmBase.push_back(wmB / tempMat);
 
+    //imgShow(wmA / tempMat);
+    //imgShow(wmB / tempMat);
+    //cout << "Success 4." << endl;
+
     // detail layers
     guidedfilter(wmA, imgIns[0], salMapA, r2, eps2);
     guidedfilter(wmB, imgIns[1], salMapB, r2, eps2);
     tempMat = wmA + wmB;
     wmDetail.push_back(wmA / tempMat);
     wmDetail.push_back(wmB / tempMat);
+
+    //imgShow(wmA / tempMat);
+    //imgShow(wmB / tempMat);
 }
 
