@@ -17,7 +17,7 @@ public:
     // delete the copy construct function
     Fusion(Fusion& a) = delete;
     // delete the copy function
-    Fusion& operator= (Fusion& f) = delete;
+    Fusion& operator= (const Fusion& f) = delete;
     ~Fusion();
 
     void imageFusion(cv::Mat& imgOut, const cv::Mat& imgInA, const cv::Mat& imgInB);
