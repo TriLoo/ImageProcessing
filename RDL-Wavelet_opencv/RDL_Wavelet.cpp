@@ -9,6 +9,18 @@
 using namespace std;
 using namespace cv;
 
+void imgShow(const Mat& img)
+{
+    imshow("Temp", img);
+    waitKey(0);
+}
+
+void imgShow(const Mat&& img)
+{
+    imshow("Temp", img);
+    waitKey(0);
+}
+
 RDLWavelet::RDLWavelet(int r, int c, int d) : row(r), col(c), Dir(d)
 {
 }
@@ -78,19 +90,21 @@ void RDLWavelet::Horizontal_Update(cv::Mat &layerBase,const cv::Mat &layerDetail
 
 void RDLWavelet::Inverse_Horizontal_Update(cv::Mat &imgOut, const cv::Mat& imgBase, const cv::Mat& imgDetail)
 {
+    const int colT = imgBase.cols;
+    const int rowT = imgBase.rows;
     //const float Dvid = 1.0 / (((Dir << 1)  + 1) << 1);
     const float Dvid = 1.0 / (2 * (Dir * 2 + 1));
     Mat tempMat, tempMat_buf;
-    Mat resMat(Size(col, row), imgBase.type());
-    resize(imgDetail, tempMat, Size(Dir * col, row), Dir, 0, INTER_CUBIC);
+    Mat resMat(Size(colT, rowT), imgBase.type());
+    resize(imgDetail, tempMat, Size(Dir * colT, rowT), Dir, 0, INTER_CUBIC);
     copyMakeBorder(tempMat, tempMat_buf, Dir, Dir, Dir, Dir, BORDER_REFLECT101);
 
     float tempSum = 0.0;
-    for (int i = Dir; i < Dir + row - 1; ++i)
+    for (int i = Dir; i < Dir + rowT - 1; ++i)
     {
         auto rowPtrUp = tempMat_buf.ptr<float>(i - 1);
         auto rowPtrDown = tempMat_buf.ptr<float>(i + 1);
-        for (int j = 0; j < col; ++j)
+        for (int j = 0; j < colT; ++j)
         {
             for (int k = -Dir; k <= Dir; ++k)
                 tempSum += rowPtrUp[j*Dir + Dir + k] + rowPtrDown[j * Dir + Dir + k];
@@ -150,6 +164,7 @@ void RDLWavelet::inverseRdlWavelet(cv::Mat &imgOut, std::vector<cv::Mat> &imgIns
     // Inverse Vertical Transform
     Inverse_Horizontal_Update(imgDetail, imgIns[2].t(), imgIns[3].t());
     Inverse_Horizontal_Update(imgBase, imgIns[0].t(), imgIns[1].t());
+    //imgShow(imgBase);
 
     // Inverse Horizontal Transform
     Inverse_Horizontal_Update(imgOut, imgBase.t(), imgDetail.t());

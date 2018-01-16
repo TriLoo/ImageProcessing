@@ -7,7 +7,7 @@ using namespace cv;
 int main() {
     std::cout << "Hello, World!" << std::endl;
 
-    Mat imgIn = imread("Barbara.jpg", IMREAD_COLOR);
+    Mat imgIn = imread("Marne_04_IR.bmp", IMREAD_COLOR);
     imshow("Input", imgIn);
 
     if(imgIn.channels() != 1)
@@ -39,7 +39,7 @@ int main() {
     rw.inverseRdlWavelet(imgRes, imgOuts);
 
     // for test
-    cout << imgRes(Range(0, 10), Range(0, 10)) << endl;
+    //cout << imgRes(Range(0, 10), Range(0, 10)) << endl;
 
     // for test
     Mat tempMat;
