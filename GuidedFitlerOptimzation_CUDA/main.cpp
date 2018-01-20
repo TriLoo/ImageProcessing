@@ -5,6 +5,12 @@ using namespace cv;
 
 int main() {
     //std::cout << "Hello, World!" << std::endl;
+    cudaDeviceProp cudaProp;
+    int cudaId;
+    cudaGetDevice(&cudaId);
+    cudaGetDeviceProperties(&cudaProp, cudaId);
+    cout << "Device ID: " << cudaId << endl;
+    cout << "Concurrent Kernel Execution: " << cudaProp.concurrentKernels << endl;
     Mat imgI = imread("Barbara.jpg", IMREAD_COLOR);
     //assert(imgI.empty() != true);
     assert(!imgI.empty());
@@ -17,7 +23,7 @@ int main() {
     Mat imgP = imgI;
 
     GFilter gf(imgI.rows, imgI.cols);
-    gf.setParams(16, 0.01);
+    gf.setParams(16, 0.01);   // Image Enhancement
 
     Mat imgOut;
     //gf.guidedfilterOpenCV(imgOut, imgI, imgP);

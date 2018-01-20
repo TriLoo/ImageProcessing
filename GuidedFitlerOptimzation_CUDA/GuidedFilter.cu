@@ -23,11 +23,13 @@ GFilter::~GFilter()
 
 // do boxfilter
 
-// color image guided filter
-
-
 void GFilter::boxfilter(float *imgOut_d, const float *imgIn_d, int rad)
 {
+}
+
+void GFilter::boxfilterTest(cv::Mat &imgOut, const cv::Mat &imgIn, int rad)
+{
+    const float* imgInP = (float *)imgIn.data;
 }
 
 void GFilter::gaussianfilter(float *imgOut_d, const float *imgIn_d, int rad, double sig)
@@ -35,6 +37,7 @@ void GFilter::gaussianfilter(float *imgOut_d, const float *imgIn_d, int rad, dou
 }
 
 // 输入图像是相同的  e.g. imgInI == imgInP
+// color image guided filter
 void GFilter::guidedfilterSingle(cv::Mat &imgOut, const cv::Mat &imgInI, const cv::Mat &imgInP)
 {
 
@@ -63,7 +66,7 @@ void GFilter::guidedfilterOpenCV(cv::Mat &imgOut, const cv::Mat &imgInI, const c
 {
     assert(imgInP.channels() == 3);
     if (rad_ == 0)
-        setParams();
+        setParams(16, 0.01);    // Image Enhancement
 
     Mat meanI, corrI, varI, meanP;
     boxFilter(imgInI, meanI, imgInI.depth(), Size(rad_, rad_));
@@ -81,14 +84,17 @@ void GFilter::guidedfilterOpenCV(cv::Mat &imgOut, const cv::Mat &imgInI, const c
 
     Mat covIp, sameP, sameMeanP, meanA, meanB;
     vector<Mat> vecA(imgInI.channels());
-//#pragma unloop
+#pragma unloop
     for (int i = 0; i < 3; ++i)
     {
-        vector<Mat> vecSameP{vecP[i], vecP[i], vecP[i]};
-        merge(vecSameP, sameP);
+        //vector<Mat> vecSameP{vecP[i], vecP[i], vecP[i]};
+        //merge(vecSameP, sameP);
+        //boxFilter(imgInI.mul(sameP), covIp, imgInI.depth(), Size(rad_, rad_));
+        //vector<Mat> vecSameMeanP{vecMeanP[i], vecMeanP[i], vecMeanP[i]};
+        //merge(vecSameMeanP, sameMeanP);
+        cvtColor(vecP[i], sameP, CV_GRAY2BGR);         // use cvtColor to do the broadcast purpose, instead of above method
+        cvtColor(vecMeanP[i], sameMeanP, CV_GRAY2BGR);
         boxFilter(imgInI.mul(sameP), covIp, imgInI.depth(), Size(rad_, rad_));
-        vector<Mat> vecSameMeanP{vecMeanP[i], vecMeanP[i], vecMeanP[i]};
-        merge(vecSameMeanP, sameMeanP);
         covIp = covIp - meanI.mul(sameMeanP);
 
         Mat a = covIp / (varI + eps_);
@@ -105,5 +111,3 @@ void GFilter::guidedfilterOpenCV(cv::Mat &imgOut, const cv::Mat &imgInI, const c
     }
     merge(vecP, imgOut);
 }
-
-

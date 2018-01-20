@@ -24,7 +24,7 @@ public:
     }
     void guidedfilter(cv::Mat& imgOut, const cv::Mat& imgInI, const cv::Mat& imgInP);
     void guidedfilterOpenCV(cv::Mat& imgOut, const cv::Mat& imgInI, const cv::Mat& imgInP);
-
+    void boxfilterTest(cv::Mat& imgOut, const cv::Mat& imgIn, int rad = 16);
 private:
     void guidedfilterSingle(cv::Mat& imgOut, const cv::Mat& imgInI, const cv::Mat& imgInP);
     void guidedfilterDouble(cv::Mat& imgOut, const cv::Mat& imgInI, const cv::Mat& imgInP);
