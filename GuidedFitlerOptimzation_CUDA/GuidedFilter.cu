@@ -21,7 +21,14 @@ GFilter::~GFilter()
 {
 }
 
+// Kernel functions
 // do boxfilter
+__global__ void
+d_boxfilter_rgb_x(float* d_out, const float3 * __restrict__ d_in, int row, int col)
+{
+    int idx = threadIdx.x + blockDim.x * blockIdx.x;
+    int idy = threadIdx.x + blockDim.x * blockIdx.x;
+}
 
 void GFilter::boxfilter(float *imgOut_d, const float *imgIn_d, int rad)
 {

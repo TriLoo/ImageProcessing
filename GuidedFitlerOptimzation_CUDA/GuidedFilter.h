@@ -32,7 +32,7 @@ private:
     void boxfilter(float* imgOut_d, const float* imgIn_d, int rad);
     void gaussianfilter(float* imgOut_d, const float* imgIn_d, int rad, double sig);
 
-    int row_, col_;
+    int row_, col_;   // unit: pixel, NOT Byte
     int rad_ = 0;
     double eps_ = 0;
 };
