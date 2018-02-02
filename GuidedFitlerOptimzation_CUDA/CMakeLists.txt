@@ -4,14 +4,15 @@ project(GuidedFilterOptimize)
 set(CMAKE_CXX_STANDARD 11)
 
 include(CheckCXXCompilerFlag)
-CHECK_CXX_COMPILER_FLAG("=std=c++11" COMPILER_SUPPORTS_CXX11)
+CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-
 
 include(/usr/share/cmake-3.2/Modules/FindCUDA.cmake)
 
 find_package(CUDA REQUIRED)
 find_package(OpenCV REQUIRED)
+
+include_directories(./inc)
 
 set(SOURCE_FILES main.cpp GuidedFilter.cu headers.h)
 cuda_add_executable(GuidedFilterOptimize ${SOURCE_FILES})

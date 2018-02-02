@@ -4,56 +4,50 @@
 using namespace std;
 using namespace cv;
 
+struct TestFloat4
+{
+    float x;
+    float y;
+    float z;
+    float w;
+};
+
 int main() {
     //std::cout << "Hello, World!" << std::endl;
     cudaDeviceProp cudaProp;
-    int cudaId;
+    int cudaId, cudaVersion;
     cudaGetDevice(&cudaId);
     cudaGetDeviceProperties(&cudaProp, cudaId);
+    cudaDriverGetVersion(&cudaVersion);
     cout << "Device ID: " << cudaId << endl;
     cout << "Concurrent Kernel Execution: " << cudaProp.concurrentKernels << endl;
+    cout << "CUDA Version: " << cudaVersion << endl;
+    cout << "GPU Asynchronize Engine Count: " << cudaProp.asyncEngineCount << endl;
+    cout << "Registers per SM: " << cudaProp.regsPerMultiprocessor << endl;
+    cout << "Count of SM:  " << cudaProp.multiProcessorCount << endl;
+    cout << "Concurrent kernels: " << cudaProp.concurrentKernels << endl;
+    cout << "Register per Block: " << cudaProp.regsPerBlock << endl;
+
+    cout << "Test size of Float4." << endl;
+    cout << sizeof(TestFloat4) << endl;         // return 16
+    cout << "Test size of Float4." << endl;
 
     Mat imgI = imread("Barbara.jpg", IMREAD_COLOR);
     assert(!imgI.empty());
     const int row = imgI.rows;
     const int col = imgI.cols;
     imgI.convertTo(imgI, CV_32FC3, 1.0 / 255);
-    const float* imgI_h = (const float*)imgI.data;
     imshow("Input", imgI);
     Mat imgP = imgI;
     cout << "Image Info: " << endl;
     cout << "Size: " << row << " * " << col << endl;
     cout << "Channels: " << imgI.channels() << endl << endl;
     Mat imgOut = Mat::zeros(Size(col, row), imgI.type());
+
     //GFilter gf(imgI.rows, imgI.cols);
     //gf.setParams(16, 0.01);   // Image Enhancement
 
     //boxFilter(imgI, imgOut, imgI.depth(), Size(16, 16));
-    float* imgOut_h = (float *)imgOut.data;
-    assert(imgI.isContinuous());
-    int pSrcStepBytes = col * sizeof(float) * imgI.channels();
-    //cout << "Src Step: " << pSrcStepBytes << endl;
-    int pStepBytes;
-    Npp32f* imgIn_d = nppiMalloc_32f_C3(col, row, &pStepBytes);
-    NppStatus stateNpp = NPP_SUCCESS;
-    cudaError_t stateCUDA = cudaSuccess;
-    NppiSize sizeROI;
-    sizeROI.width = col;
-    sizeROI.height = row;
-    //stateNpp = nppiCopy_32f_C3R(imgI_h, pSrcStepBytes, imgIn_d, pStepBytes, sizeROI);
-    //assert(stateNpp == NPP_SUCCESS);
-    // Copy image from host to device
-    stateCUDA = cudaMemcpy2D(imgIn_d, pStepBytes, imgI_h, pSrcStepBytes, pSrcStepBytes, row, cudaMemcpyHostToDevice);
-    assert(stateCUDA == cudaSuccess);
-    //cout << imgOut(Range(0, 10), Range(90, 100)) << endl;
-    //imshow("Temp", imgOut);
-    Npp32f* imgOut_d = nppiMalloc_32f_C3(col, row, &pStepBytes);
-    NppiSize oMaskSize = {16, 16};
-    NppiPoint oAnchor = {oMaskSize.width/2, oMaskSize.height / 2};
-
-
-
-    // boxFilter(imgI, imgOut, imgI.depth(), Size(16, 16));
     // gf.guidedfilterOpenCV(imgOut, imgI, imgI);
     //stateNpp = nppiFilterBoxBorder_32f_C3R(imgIn_d, pStepBytes, sizeROI, {0,0}, imgOut_d, pStepBytes, sizeROI, oMaskSize, oAnchor, NPP_BORDER_REPLICATE);
     chrono::steady_clock::time_point start = chrono::steady_clock::now();
@@ -64,28 +58,41 @@ int main() {
     // -------------------------- boxFilter OpenCV -------------------------- //
 
     // -------------------------- nppiFilterBox_32f_C3R -------------------------- //
-    stateNpp = nppiFilterBoxBorder_32f_C3R(imgIn_d, pStepBytes, sizeROI, {0,0}, imgOut_d, pStepBytes, sizeROI, oMaskSize, oAnchor, NPP_BORDER_REPLICATE);
-    if (stateNpp != NPP_SUCCESS)
-    {
-        nppiFree(imgIn_d);
-        nppiFree(imgOut_d);
-        exit(EXIT_FAILURE);
-    }
-    cudaDeviceSynchronize();
+     //gf.boxfilterNpp(imgOut, imgI);
     // -------------------------- nppiFilterBox_32f_C3R -------------------------- //
 
     // -------------------------- guided filter OpenCV -------------------------- //
-    //gf.guidedfilterOpenCV(imgOut, imgI, imgP);
+    // gf.guidedfilterOpenCV(imgOut, imgI, imgP);
     // normalize(imgOut, imgOut, 0, 1, CV_MINMAX);
     // -------------------------- guided filter OpenCV -------------------------- //
+
+    // -------------------------- Test Pinned Memory -------------------------- //
+    float *inP = (float *)imgI.data;
+    float *outP = (float *)imgOut.data;
+
+    cudaError_t cudaState = cudaSuccess;
+    cudaState = cudaHostRegister(inP, sizeof(float) * imgI.channels() * row * col, cudaHostRegisterDefault);
+    assert(cudaState == cudaSuccess);
+    cudaState = cudaHostRegister(outP, sizeof(float) * imgI.channels() * row * col, cudaHostRegisterDefault);
+    assert(cudaState == cudaSuccess);
+
+    float* in_d;
+    size_t srcPatch;
+    cudaState = cudaMallocPitch((void **)&in_d, &srcPatch, sizeof(float) * col * imgI.channels(), row);    // The width unit is byte
+    assert(cudaState == cudaSuccess);
+    cudaState = cudaMemcpy2DAsync(in_d, srcPatch, inP, col * sizeof(float) * imgI.channels(), col * sizeof(float) * imgI.channels(), row, cudaMemcpyHostToDevice);
+    assert(cudaState == cudaSuccess);
+    cudaState = cudaMemcpy2DAsync(outP, col * sizeof(float) * imgI.channels(), in_d, srcPatch, srcPatch, row, cudaMemcpyDeviceToHost);
+    assert(cudaState == cudaSuccess);
+
+    cudaState = cudaHostUnregister(inP);
+    assert(cudaState == cudaSuccess);
+    cudaState = cudaHostUnregister(outP);
+    assert(cudaState == cudaSuccess);
+    // -------------------------- Test Pinned Memory -------------------------- //
     chrono::steady_clock::time_point stop = chrono::steady_clock::now();
     chrono::duration<double> elapsedTime = static_cast<chrono::duration<double>>(stop - start);
-    cout << "Elapsed Time: " << elapsedTime.count() * 1000.0 << "ms." << endl;
-    stateCUDA = cudaMemcpy2D(imgOut_h, pSrcStepBytes, imgOut_d, pStepBytes, pStepBytes, row, cudaMemcpyDeviceToHost);
-    assert(stateCUDA == cudaSuccess);
-    cudaDeviceSynchronize();
-    nppiFree(imgIn_d);
-    nppiFree(imgOut_d);
+    cout << "Total Elapsed Time: " << elapsedTime.count() * 1000.0 << "ms." << endl;
     imshow("Result", imgOut);
     waitKey(0);
 
