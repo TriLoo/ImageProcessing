@@ -33,6 +33,7 @@ int main() {
     cout << "Test size of Float4." << endl;
 
     Mat imgI = imread("Barbara.jpg", IMREAD_COLOR);
+    //Mat imgI = imread("lena.jpg", IMREAD_COLOR);
     assert(!imgI.empty());
     const int row = imgI.rows;
     const int col = imgI.cols;
@@ -44,8 +45,9 @@ int main() {
     cout << "Channels: " << imgI.channels() << endl << endl;
     Mat imgOut = Mat::zeros(Size(col, row), imgI.type());
 
-    //GFilter gf(imgI.rows, imgI.cols);
-    //gf.setParams(16, 0.01);   // Image Enhancement
+    GFilter gf(imgI.rows, imgI.cols);
+    gf.setParams(16, 0.01);   // Image Enhancement
+    //gf.boxfilterTest(imgOut, imgI);
 
     //boxFilter(imgI, imgOut, imgI.depth(), Size(16, 16));
     // gf.guidedfilterOpenCV(imgOut, imgI, imgI);
@@ -61,12 +63,17 @@ int main() {
      //gf.boxfilterNpp(imgOut, imgI);
     // -------------------------- nppiFilterBox_32f_C3R -------------------------- //
 
+    // -------------------------- boxFilter CUDA -------------------------- //
+    gf.boxfilterTest(imgOut, imgI);
+    // -------------------------- boxFilter CUDA -------------------------- //
+
     // -------------------------- guided filter OpenCV -------------------------- //
     // gf.guidedfilterOpenCV(imgOut, imgI, imgP);
     // normalize(imgOut, imgOut, 0, 1, CV_MINMAX);
     // -------------------------- guided filter OpenCV -------------------------- //
 
     // -------------------------- Test Pinned Memory -------------------------- //
+    /*
     float *inP = (float *)imgI.data;
     float *outP = (float *)imgOut.data;
 
@@ -89,6 +96,7 @@ int main() {
     assert(cudaState == cudaSuccess);
     cudaState = cudaHostUnregister(outP);
     assert(cudaState == cudaSuccess);
+    */
     // -------------------------- Test Pinned Memory -------------------------- //
     chrono::steady_clock::time_point stop = chrono::steady_clock::now();
     chrono::duration<double> elapsedTime = static_cast<chrono::duration<double>>(stop - start);
