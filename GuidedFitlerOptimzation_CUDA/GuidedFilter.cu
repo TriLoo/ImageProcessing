@@ -39,7 +39,9 @@ GFilter::GFilter(int r, int c) : row_(r), col_(c), rad_(45), eps_(0.000001)
     cudaCheckError(cudaMallocPitch(&tempF_, &pitch_, c * sizeof(float4), r));
 
     cudaCheckError(cudaMallocPitch(&tempData_, &pitch_, c * sizeof(float4), r));
+    cout << "Pitch = " << pitch_ << endl;        // for lena: 6656
     pitch_ /= sizeof(float4);    // Unit: Changing from bytes to float4
+    cout << "Pitch = " << pitch_ << endl;        // for lena: 416
 
     cudaCheckError(cudaStreamCreate(&stream1_));
     cudaCheckError(cudaStreamCreate(&stream2_));
@@ -133,9 +135,9 @@ d_box_P_x(float4* d_out, int row, int col, int rad, size_t pitch)
 }
 
 // CAUTION: The input is transposed in Texture Memory ! ! !
-/*
+// /*
 __global__ void
-testTexture(float4 *d_out, int row, int col)
+testTexture(float4 *d_out, int row, int col, size_t pitch)
 {
     unsigned int y = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -144,13 +146,16 @@ testTexture(float4 *d_out, int row, int col)
         float4 t = make_float4(0.0f);
         for (int x = 0; x < col; ++x)
         {
-            t = tex2D(rgbaTex, x, y);
+            t = tex2D(rgbaTexI, x, y);          // return the right matrix
+            //t = tex2D(rgbaTexI, y, x);        // return the transposed matrix
+            //t = tex2D(rgbaTexP, x, y);
 
-            d_out[x * row + y] = t;
+            //d_out[x * row + y] = t;
+            d_out[y * pitch + x] = t;
         }
     }
 }
-*/
+// */
 
 __global__ void
 d_boxfilter_rgb_y(float4* d_out_, float4* d_in_, const int row, const int col, const int rad, size_t pitch)
@@ -187,8 +192,8 @@ d_boxfilter_rgb_y(float4* d_out_, float4* d_in_, const int row, const int col, c
         for (int y = (1 + rad); y < (row - rad); y++)
         {
             t += d_in[(y + rad) * pitch];
-            t -= d_in[(y - rad) * pitch];
-            d_out[y * col] = t * scale;
+            t -= d_in[(y - rad) * pitch - pitch];
+            d_out[y * pitch] = t * scale;     // ! HERE !, correct y * col to y * pitch
         }
 
         // do right edge
@@ -252,6 +257,7 @@ d_square_box_Ip_x(float4* d_out, int row, int col, int rad, size_t pitch)
 }
 
 // the d_in and d_out are both 2D pitch memory
+// No need to square the inputs ! ! ! Because the calculation is done in row direction boxfiltering.
 __global__ void
 d_square_box_y(float4* d_out_, float4* d_in_, const int row, const int col, const int rad, size_t pitch)
 {
@@ -287,7 +293,7 @@ d_square_box_y(float4* d_out_, float4* d_in_, const int row, const int col, cons
         for (int y = (1 + rad); y < (row - rad); y++)
         {
             t += d_in[(y + rad) * pitch] * d_in[(y + rad) * pitch];
-            t -= d_in[(y - rad) * pitch] * d_in[(y - rad) * pitch];
+            t -= d_in[(y - rad - 1) * pitch] * d_in[(y - rad - 1) * pitch];
             d_out[y * pitch] = t * scale;
         }
 
@@ -295,7 +301,7 @@ d_square_box_y(float4* d_out_, float4* d_in_, const int row, const int col, cons
         for (int y = row - rad; y < row; y++)
         {
             t += d_in[(row - 1) * pitch] * d_in[(row - 1) * pitch];
-            t -= d_in[((y - rad) * pitch) - col] * d_in[((y - rad) * pitch) - pitch];
+            t -= d_in[((y - rad) * pitch) - pitch] * d_in[((y - rad) * pitch) - pitch];
 
             d_out [y * pitch] = t * scale;
         }
@@ -307,7 +313,8 @@ d_square_box_y(float4* d_out_, float4* d_in_, const int row, const int col, cons
 // covIp = corrIp - meanI .* meanP;
 // a = corIp ./ (varI + eps);
 // meanA = fmean(a);   this is implemented in the host function calling boxfilter, not a single kernel function
-__global__ void calculateA(float4 *out, float4 *corrI, float4 *meanI, float4 *corrIp, float4 *meanP, double eps, int rows, int cols, size_t pitch)
+//__global__ void calculateA(float4 *out, float4 *corrI, float4 *meanI, float4 *corrIp, float4 *meanP, double eps, int rows, int cols, size_t pitch)
+__global__ void calculateA(float4 *out, float4 *corrI, float4 *meanI, float4 *corrIp, float4 *meanP, float eps, int rows, int cols, size_t pitch)
 {
     int idx = threadIdx.x + blockIdx.x * blockDim.x;
     int idy = threadIdx.y + blockIdx.y * blockDim.y;
@@ -416,9 +423,12 @@ void GFilter::initTexture(const cv::Mat &inI, const cv::Mat &inP)
     cudaCheckError(cudaHostRegister(inI_P, sizeof(float4) * row_ * col_, cudaHostRegisterDefault));
     cudaCheckError(cudaHostRegister(inP_P, sizeof(float4) * row_ * col_, cudaHostRegisterDefault));
 
+    size_t srcPitch = sizeof(float4) * col_;
     // Copy data from CPU to GPU
-    cudaCheckError(cudaMemcpyAsync(tempF_, inI_P,sizeof(float4) * row_ * col_, cudaMemcpyHostToDevice, stream1_));
-    cudaCheckError(cudaMemcpyAsync(tempC_, inP_P,sizeof(float4) * row_ * col_, cudaMemcpyHostToDevice, stream2_));
+    cudaCheckError(cudaMemcpy2DAsync(tempF_, pitch_ * sizeof(float4), inI_P, srcPitch, srcPitch, row_, cudaMemcpyHostToDevice, stream1_));
+    cudaCheckError(cudaMemcpy2DAsync(tempC_, pitch_ * sizeof(float4), inP_P, srcPitch, srcPitch, row_, cudaMemcpyHostToDevice, stream2_));
+    //cudaCheckError(cudaMemcpy2D(tempF_, pitch_ * sizeof(float4), inI_P, srcPitch, srcPitch, row_, cudaMemcpyHostToDevice));
+    //cudaCheckError(cudaMemcpy2D(tempC_, pitch_ * sizeof(float4), inP_P, srcPitch, srcPitch, row_, cudaMemcpyHostToDevice));
 
     // bind the above two memories to texture
     cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc<float4>();
@@ -465,10 +475,13 @@ void GFilter::initTexture(float* data)
     delete [] tempSrc;
 }
 
-void releaseTexture()
+void GFilter::releaseTexture()
 {
     cudaUnbindTexture(rgbaTexI);
     cudaUnbindTexture(rgbaTexP);
+
+    cudaHostUnregister(inI_.data);
+    cudaHostUnregister(inP_.data);
     //cudaCheckError(cudaFreeArray(rgbaOut_d));
 }
 
@@ -514,103 +527,111 @@ void GFilter::boxfilterTempC(float4* imgIO)
 void GFilter::boxfilterImgI(float4 *imgIO)
 {
     // Measure the time used to calculate boxfilter of tempC_, binded to rgbaTexP;
-    cudaEvent_t start, stop;
-    cudaEventCreate(&start);
-    cudaEventCreate(&stop);
+    //cudaEvent_t start, stop;
+    //cudaEventCreate(&start);
+    //cudaEventCreate(&stop);
 
-    cudaEventRecord(start);
+    //cudaEventRecord(start);
     // use texture for horizontal pass
-    //dim3 blockPerGrid = ;
     d_box_I_x<<<iDiv(row_, BLOCKSIZE), BLOCKSIZE, 0>>>(tempData_, row_, col_, rad_, pitch_);   // use row_ / BLOCKSIZE, because the input is transposed.
-    //d_boxfilter_rgb_x<<<iDiv(row_, BLOCKSIZE), BLOCKSIZE, 0>>>(outDataD, row_, col_, rad);
-    //testTexture<<<row_ / BLOCKSIZE, BLOCKSIZE, 0>>>(outDataD, row_, col_);     // The Result is transposed of input matrix
+    // below one is correct
+    //d_box_I_x<<<iDiv(row_, BLOCKSIZE), BLOCKSIZE, 0>>>(imgIO, row_, col_, rad_, pitch_);   // use row_ / BLOCKSIZE, because the input is transposed.
+
     d_boxfilter_rgb_y<<<iDiv(col_, BLOCKSIZE), BLOCKSIZE, 0>>>(imgIO, tempData_, row_, col_, rad_, pitch_);
+    // below one is correct
+    //d_boxfilter_rgb_y<<<iDiv(col_, BLOCKSIZE), BLOCKSIZE, 0>>>(imgIO, tempB_, row_, col_, rad_, pitch_);
     //cout << cudaGetErrorString(cudaPeekAtLastError()) << endl;
 
-    cudaEventRecord(stop);
-    cudaEventSynchronize(stop);
-    float elapsedTime = 0.0;
-    cudaEventElapsedTime(&elapsedTime, start, stop);
-    cout << "Boxfilter on GPU(no data transfer: " << elapsedTime << " ms." << endl;
+    //cudaEventRecord(stop);
+    //cudaEventSynchronize(stop);
+    //float elapsedTime = 0.0;
+    //cudaEventElapsedTime(&elapsedTime, start, stop);
+    //cout << "Boxfilter on GPU(no data transfer: " << elapsedTime << " ms." << endl;
 }
 
 // calculate corrI & corrIp
 void GFilter::boxfilterMultiple(float4 *corrI, float4 *corrIp)
 {
     // Measure the time used to calculate boxfilter of tempC_, binded to rgbaTexP;
-    cudaEvent_t start, stop;
-    cudaEventCreate(&start);
-    cudaEventCreate(&stop);
+    //cudaEvent_t start, stop;
+    //cudaEventCreate(&start);
+    //cudaEventCreate(&stop);
 
     dim3 blockPerGrid = iDiv(row_, BLOCKSIZE);
     dim3 threadPerBlock = BLOCKSIZE;
 
-    cudaEventRecord(start);
+    //cudaEventRecord(start);
     // use texture for horizontal pass
     // calculate corrI
     d_square_box_I_x<<<blockPerGrid, threadPerBlock, 0>>>(tempData_, row_, col_, rad_, pitch_);   // use row_ / BLOCKSIZE, because the input is transposed.
     //testTexture<<<row_ / BLOCKSIZE, BLOCKSIZE, 0>>>(outDataD, row_, col_);     // The Result is transposed of input matrix
-    d_square_box_y<<<blockPerGrid, BLOCKSIZE, 0>>>(corrI, tempData_, row_, col_, rad_, pitch_);
-    //cout << cudaGetErrorString(cudaPeekAtLastError()) << endl;
+    d_boxfilter_rgb_y<<<blockPerGrid, BLOCKSIZE, 0>>>(corrI, tempData_, row_, col_, rad_, pitch_);
+    //d_square_box_y<<<blockPerGrid, BLOCKSIZE, 0>>>(corrI, tempData_, row_, col_, rad_, pitch_);
+    cout << cudaGetErrorString(cudaPeekAtLastError()) << endl;
 
     // calculate corrIp
     d_square_box_Ip_x<<<blockPerGrid, threadPerBlock, 0>>>(tempData_, row_, col_, rad_, pitch_);   // use row_ / BLOCKSIZE, because the input is transposed.
     //d_boxfilter_rgb_x<<<iDiv(row_, BLOCKSIZE), BLOCKSIZE, 0>>>(outDataD, row_, col_, rad);
-    d_square_box_y<<<blockPerGrid, BLOCKSIZE, 0>>>(corrIp, tempData_, row_, col_, rad_, pitch_);
-    //cout << cudaGetErrorString(cudaPeekAtLastError()) << endl;
+    d_boxfilter_rgb_y<<<blockPerGrid, BLOCKSIZE, 0>>>(corrIp, tempData_, row_, col_, rad_, pitch_);
+    //d_square_box_y<<<blockPerGrid, BLOCKSIZE, 0>>>(corrIp, tempData_, row_, col_, rad_, pitch_);
+    cout << cudaGetErrorString(cudaPeekAtLastError()) << endl;
 
-    cudaEventRecord(stop);
-    cudaEventSynchronize(stop);
-    float elapsedTime = 0.0;
-    cudaEventElapsedTime(&elapsedTime, start, stop);
-    cout << "Boxfilter on GPU(no data transfer: " << elapsedTime << " ms." << endl;
+    //cudaEventRecord(stop);
+    //cudaEventSynchronize(stop);
+    //float elapsedTime = 0.0;
+    //cudaEventElapsedTime(&elapsedTime, start, stop);
+    //cout << "Boxfilter on GPU(no data transfer: " << elapsedTime << " ms." << endl;
 }
 
-void GFilter::boxfilterTest(cv::Mat &imgOut, const cv::Mat &imgIn, int rad)
-{
-}
-/*
 void GFilter::boxfilterTest(cv::Mat &imgOut, const cv::Mat &imgIn, int rad)
 {
     cudaEvent_t start, stop;
     cudaEventCreate(&start);
     cudaEventCreate(&stop);
 
-    float *dataInP = (float *)imgIn.data;
-    float *dataOutP = (float *)imgOut.data;
+    setParams(5, 0.01);
+    cout << "Rad = " << rad_ << endl;
+    cout << "Eps = " << eps_ << endl;
 
-    float4 *tempData, *outDataD;
-    float *tempDataH = new float [row_ * col_ * sizeof(float4)];
-    //cudaChannelFormatDesc channels = cudaCreateChannelDesc<float4>();
-    cudaCheckError(cudaMalloc((void **)&tempData, sizeof(float4) * col_ * row_));
-    cudaCheckError(cudaMalloc((void **)&outDataD, sizeof(float4) * col_ * row_));
+    // copy data from cpu to gpu, then binds to texture
+    if (imgIn.channels() == 3)
+        cvtColor(imgIn, inI_, CV_BGR2BGRA);
+    if (inI_.type() != CV_32FC4)
+        inI_.convertTo(inI_, CV_32FC4, 1.0 / 255);
 
-    initTexture(dataInP);
+    float *inP = (float *)inI_.data;
+    cout << "Pitch in boxfilter = " << pitch_ * sizeof(float4) << endl;
+    cudaCheckError(cudaMemcpy2D(tempB_, pitch_ * sizeof(float4), inP, sizeof(float4) * col_, sizeof(float4) * col_, row_,cudaMemcpyHostToDevice));
+
+    if (imgOut.channels() == 3)
+        cvtColor(imgOut, imgOut, CV_BGR2BGRA);
+    if (imgOut.type() != CV_32FC4)
+        imgOut.convertTo(imgOut, CV_32FC4, 1.0 / 255);
+
+    float *outP = (float *)imgOut.data;
+
+    cudaChannelFormatDesc cudaChannel = cudaCreateChannelDesc<float4>();
+    cudaCheckError(cudaBindTexture2D(nullptr, rgbaTexI, tempB_, cudaChannel, col_, row_, pitch_ * sizeof(float4)));
+    //cudaCheckError(cudaBindTexture2D(0, rgbaTexP, tempB_, cudaChannel, col_, row_, pitch_ * sizeof(float4)));
+
     cudaEventRecord(start);
-    // use texture for horizontal pass
-    //dim3 blockPerGrid = ;
-    d_boxfilter_rgb_x<<<iDiv(row_, BLOCKSIZE), BLOCKSIZE, 0>>>(tempData, row_, col_, rad);   // use row_ / BLOCKSIZE, because the input is transposed.
-    //d_boxfilter_rgb_x<<<iDiv(row_, BLOCKSIZE), BLOCKSIZE, 0>>>(outDataD, row_, col_, rad);
-    //testTexture<<<row_ / BLOCKSIZE, BLOCKSIZE, 0>>>(outDataD, row_, col_);     // The Result is transposed of input matrix
-    d_boxfilter_rgb_y<<<iDiv(col_, BLOCKSIZE), BLOCKSIZE, 0>>>(outDataD, tempData, row_, col_, rad);
-    //cout << cudaGetErrorString(cudaPeekAtLastError()) << endl;
+
+    boxfilterImgI(tempA_);
+    //boxfilterTempC(tempA_);
+    //testTexture<<<iDiv(row_, BLOCKSIZE), BLOCKSIZE, 0>>>(tempA_, row_, col_, pitch_);
+
 
     cudaEventRecord(stop);
     cudaEventSynchronize(stop);
     float elapsedTime = 0.0;
     cudaEventElapsedTime(&elapsedTime, start, stop);
-    cout << "Boxfilter on GPU(no data transfer: " << elapsedTime << " ms." << endl;
+    cout << "Elapsed Time: " << elapsedTime << " ms." << endl;
 
-    cudaCheckError(cudaMemcpy(tempDataH, outDataD, sizeof(float4) * row_ * col_, cudaMemcpyDeviceToHost));
-    //cudaCheckError(cudaMemcpy(tempDataH, tempData, sizeof(float4) * row_ * col_, cudaMemcpyDeviceToHost));
-    //cudaCheckError(cudaMemcpyFromArray(tempDataH, rgbaIn_d, 0, 0, sizeof(float4) * row_ * col_, cudaMemcpyDeviceToHost));    // CORRECT ! ! !
+    cudaCheckError(cudaMemcpy2D(outP, sizeof(float4) * col_, tempA_, pitch_ * sizeof(float4), sizeof(float4) * col_, row_, cudaMemcpyDeviceToHost));
+    //cudaCheckError(cudaMemcpy2D(outP, sizeof(float4) * col_, tempB_, pitch_ * sizeof(float4), sizeof(float4) * col_, row_, cudaMemcpyDeviceToHost));
 
-    restoreFromFloat4(dataOutP, tempDataH);
-
-    delete [] tempDataH;
-    releaseTexture();
+    //cudaUnbindTexture(rgbaTexI);
 }
-*/
 
 void GFilter::boxfilterNpp(cv::Mat &imgOut, const cv::Mat &imgIn, int rad)
 {
@@ -626,17 +647,20 @@ void GFilter::boxfilterNpp(cv::Mat &imgOut, const cv::Mat &imgIn, int rad)
     NppiSize sizeROI;
     sizeROI.width = col_;
     sizeROI.height = row_;
+
+    Npp32f* imgOut_d = nppiMalloc_32f_C3(col_, row_, &pStepBytes);
+    NppiSize oMaskSize = {rad, rad};
+    NppiPoint oAnchor = {oMaskSize.width/2, oMaskSize.height / 2};
+
+
+    cudaEventRecord(startEvent_, 0);
     // Copy image from host to device
     stateCUDA = cudaMemcpy2D(imgIn_d, pStepBytes, imgI_h, pSrcStepBytes, pSrcStepBytes, row_, cudaMemcpyHostToDevice);
     assert(stateCUDA == cudaSuccess);
-    Npp32f* imgOut_d = nppiMalloc_32f_C3(col_, row_, &pStepBytes);
-    NppiSize oMaskSize = {16, 16};
-    NppiPoint oAnchor = {oMaskSize.width/2, oMaskSize.height / 2};
 
-    cudaEventRecord(startEvent_, 0);
     stateNpp = nppiFilterBoxBorder_32f_C3R(imgIn_d, pStepBytes, sizeROI, {0,0}, imgOut_d, pStepBytes, sizeROI, oMaskSize, oAnchor, NPP_BORDER_REPLICATE);
     cudaEventRecord(stopEvent_, 0);
-    //cudaEventSynchronize(stopEvent_);
+    cudaEventSynchronize(stopEvent_);
     cudaEventElapsedTime(&elapsedTime_, startEvent_, stopEvent_);
     cout << "Only GPU Time: " << elapsedTime_ << "ms." << endl;
     if (stateNpp != NPP_SUCCESS)
@@ -646,7 +670,7 @@ void GFilter::boxfilterNpp(cv::Mat &imgOut, const cv::Mat &imgIn, int rad)
         exit(EXIT_FAILURE);
     }
 
-    stateCUDA = cudaMemcpy2D(imgOut_h, pSrcStepBytes, imgOut_d, pStepBytes, pStepBytes, row_, cudaMemcpyDeviceToHost);
+    stateCUDA = cudaMemcpy2D(imgOut_h, pSrcStepBytes, imgOut_d, pStepBytes, pSrcStepBytes, row_, cudaMemcpyDeviceToHost);
     assert(stateCUDA == cudaSuccess);
     cudaDeviceSynchronize();
     nppiFree(imgIn_d);
@@ -671,8 +695,11 @@ void GFilter::guidedfilterSingle(cv::Mat &imgOut, const cv::Mat &imgInI)
 void GFilter::guidedfilterDouble(cv::Mat &imgOut, const cv::Mat &imgInI, const cv::Mat &imgInP)
 {
     // Initialize
-    //setParams(15, 0.01);   // use the default values of radius and eps
-    setParams();
+    setParams(16, 0.01);       // use the default values of radius and eps
+    //setParams(16, 0.0001);   // use the default values of radius and eps
+    //setParams(16, 16);
+    cout << "Rad = " << rad_ << endl;
+    cout << "Eps = " << eps_ << endl;
     initTexture(imgInI, imgInP);
 
     dim3 threadPerBlock(BLOCKSIZE, BLOCKSIZE);
@@ -683,20 +710,26 @@ void GFilter::guidedfilterDouble(cv::Mat &imgOut, const cv::Mat &imgInI, const c
     boxfilterMultiple(tempA_, tempD_);
     boxfilterImgI(tempB_);
     boxfilterTempC(tempE_);
+    //boxfilterTempC(tempA_);
 
+    // /*
     // Step 2: calculate A and meanA
     calculateA<<<blockPerGrid, threadPerBlock, 0>>>(tempC_, tempA_, tempB_, tempD_, tempE_, eps_, row_, col_, pitch_);
     // synchronize the device before going on to use the texture P
     cudaDeviceSynchronize();
     // get the mean of A
     boxfilterTempC(tempD_);
+    cudaDeviceSynchronize();
 
     // Step 3: calculate B and meanB
     calculateB<<<blockPerGrid, threadPerBlock, 0>>>(tempC_, tempD_, tempB_, tempE_, row_, col_, pitch_);
+    cudaDeviceSynchronize();
     boxfilterTempC(tempA_);
+    cudaDeviceSynchronize();
 
     // Step 4: calculate the output: q = meanA .* I + meanB
     calculateQ<<<blockPerGrid, threadPerBlock, 0>>>(tempA_, tempD_, row_, col_, pitch_);
+    //*/
 
     // copy back image from device to host
     if (imgOut.empty())
@@ -736,7 +769,12 @@ void GFilter::guidedfilterOpenCV(cv::Mat &imgOut, const cv::Mat &imgInI, const c
 {
     assert(imgInP.channels() == 3);
     if (rad_ == 0)
-        setParams(45, 10^(-6));    // Image Enhancement  or Blur
+        setParams(45, 1e-6);
+
+    setParams(45, 16);          // Image Enhancement  or Blur
+
+    cout << "Rad = " << rad_ << endl;
+    cout << "Eps = " << eps_ << endl;
 
     Mat meanI, corrI, varI, meanP;
     boxFilter(imgInI, meanI, imgInI.depth(), Size(rad_, rad_));
