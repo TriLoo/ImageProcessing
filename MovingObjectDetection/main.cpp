@@ -1,4 +1,5 @@
 #include "ViBe.h"
+#include "LKFlow.h"
 
 using namespace std;
 using namespace cv;
@@ -86,6 +87,51 @@ Mat BackGroundDifference(const vector<Mat> &imgBGs, const Mat& imgCurr)
 
 // 光流法
 
+int main(int argc, char ** argv) {
+    const String keys = "{h | help | print help message}"
+            "{@imgA | imgA.png | Read the input A image }"
+            "{@imgB | imgB.png | Read the input B image}";
+
+    CommandLineParser clp(argc, argv, keys);
+
+    //string help = "h";
+    if (clp.get<bool>("h")) {
+        cout << "Usage: ./MovingObjectDetection [imgA name] [imgB name]" << endl;
+    }
+
+    //string nameA(argv[1]);
+    //string nameB(argv[2]);
+    string nameA, nameB;
+
+    if (argc == 3)
+    {
+        cout << "Read images." << endl;
+        nameA = clp.get<string>("@imgA");
+        nameB = clp.get<string>("@imgB");
+    }
+
+    Mat imgA = imread(nameA, IMREAD_COLOR);
+    Mat imgB = imread(nameB, IMREAD_COLOR);
+
+    assert(!imgA.empty() && !imgB.empty());
+
+    Mat Res, resBefore;
+    ViBe tvb;
+    tvb.initViBe(imgA.cols, imgA.rows);
+    tvb.initialFrame(imgA);
+    tvb.detectionBG(imgB);
+
+    Res = tvb.getBGimg();
+
+    //Res = FrameMinus(imgA, imgB, resBefore);
+
+    //imshow("Before Morph", resBefore);
+    imshow("Result", Res);
+
+    waitKey(0);
+}
+
+/*
 int main(int argc, char **argv) {
     std::cout << "Hello, World!" << std::endl;
 
@@ -118,4 +164,4 @@ int main(int argc, char **argv) {
 
     return 0;
 }
-
+ */
