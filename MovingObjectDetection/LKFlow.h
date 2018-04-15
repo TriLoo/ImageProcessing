@@ -18,19 +18,24 @@ public:
 
     // TODO: add pyramid to the calculation
     //void calcPyramid(const cv::Mat &imgA, const cv::Mat &imgB);      // 建立金字塔
-    void calcOF(cv::Mat &imgOut, const cv::Mat &imgInA, const cv::Mat& imgInB);
-    cv::Point2f calcUV(const cv::Mat& winLeft, const cv::Mat& winRight);      // to calculate the u & v basing on a 3 * 3 window
+    void calcOF(cv::Mat &imgOut, cv::Mat &imgInA, const cv::Mat& imgInB);
+    //cv::Point2f calcUV(const cv::Mat& winLeft, const cv::Mat& winRight);      // to calculate the u & v basing on a 3 * 3 window
+    cv::Point2f calcUV(const cv::Mat &winU, const cv::Mat& winV, const cv::Mat &winb);
+    void getKps(std::vector<cv::KeyPoint> &Out);
 
 private:
     //int level_;   // the level of pyramid decomposition
     //std::vector<int> winSize_ = {5, 3, 2, 1};
+    // kpsA_: the input calculated by clacKps, kpsB_: the output of optical flow
     std::vector<cv::KeyPoint> kpsA_, kpsB_;  // KeyPoints of image A & image B
     std::vector<cv::Mat> pyramidA_, pyramidB_;    // Image Gaussian Pyramid
     // std::vector<cv::Point2f> glow_(100, cv::Point2f(0, 0));       // Storing the estimation of flow: [g_x, g_y], cannot do this in a class
     // To store the u & v of each keypoint
     std::vector<cv::Point2f> glow_ = std::vector<cv::Point2f>(1, cv::Point2f(0, 0));   // Instead, you should use = in a class ! !
 
-    void calcKps(const cv::Mat& imgA, const cv::Mat& imgB);
+    void calcKps(const cv::Mat& imgA);
+    void calcGradientUV(cv::Mat& imgOutA, cv::Mat& imgOutB, const cv::Mat &imgInA);
+    void calcGradientT(cv::Mat& imgOut, const cv::Mat& imgInA, const cv::Mat &imgInB);
 
     //cv::Mat calcGaussSubsample(const cv::Mat& imgIn, int l);
 };
