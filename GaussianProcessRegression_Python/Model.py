@@ -1,8 +1,6 @@
 import numpy as np
 import scipy.optimize
 from sklearn import gaussian_process
-import matplotlib.pyplot as plt
-from matplotlib.legend_handler import HandlerLine2D
 
 '''
 The L-BFGS-B optimization can be called in SciPy: scipy.optimize.minimize()
