@@ -9,7 +9,7 @@ detailA_abs = abs(detailA);
 detailB_abs = abs(detailB);
 
 maskA = detailA_abs > detailB_abs;
-pmA = zeros(size(detailA);
+pmA = zeros(size(detailA));
 pmA(maskA) = 1;
 
 % apply gaussian filtering to pms for obtaining the smooth maps as:
@@ -25,16 +25,22 @@ ifu = spm .* detailA + (1 - spm) .* detailB;
 mu = 0.0001;
 windowSum = ones(7);   % window size is set to 7 * 7
 matrix_a = conv2(detailA, windowSum);
-matrix_a = abs(matrix_a) + mu;
+matrix_a = 1 ./ abs(matrix_a) + mu;
 
 % second step: calculate the diagonal matrix A
-matrixA = 0;   % TODO
+matrix_a = matrix_a(:);
+[m, n] = size(detailA);
+matrix_a = sparse(1:1:m*n, 1:1:m*n, matrix_a(1:1:m*n)', m*n, m*n);
 
+temp = sparse(1:1:m*n, 1:1:m*n, ones(1, m*n), m*n, m*n);
+gamma = 0.01;
+
+denominator = 2 * temp + gamma * (matrix_a + matrix_a');
+numerator = 2 * ifu(:) + gamma * (matrix_a + matrix_a') * detailB(:);
 
 % third step: calculate the final 
-gamma = 0.01;
-matrixU = diag(1);   % TODO
-fuseImg = (ifu + gamma * matrixA * detailB) / (matrixU + gamma * matrixA);   % here, use b/A instead inv(A) to speedup the calculation, prompt by MATLAB
+fuseImg = denominator \ numerator;   % here, use b/A instead inv(A) to speedup the calculation, prompt by MATLAB
+fuseImg = reshape(fuseImg, m, n);
 
 end
 
