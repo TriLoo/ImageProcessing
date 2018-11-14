@@ -36,5 +36,7 @@ private:
 	int info_gpu = 0;
 
 public:
-	void SVDcompute(int m, int n, int lda, int ldu, int ldvt, float *A, float *U, float *S, float *VT);
+    SVDT(const int m, const int n);
+    ~SVDT();
+	void SVDcompute(int m, int n, int lda, int ldu, int ldvt, const float *A, float *U, float *S, float *VT);
 };
