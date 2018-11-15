@@ -1,6 +1,6 @@
 function [ fuseImg ] = detailLayerFusion( detailA, detailB )
 % Author: smh
-% Date  : 2018.11.13
+% Date  : 2018.10.28
 % Inputs: detailA - detail layer of infrared image
 %         detailB - detail layer of visible image
 
@@ -25,17 +25,17 @@ ifu = spm .* detailA + (1 - spm) .* detailB;
 mu = 0.0001;
 windowSum = ones(7);   % window size is set to 7 * 7
 matrix_a = conv2(detailA, windowSum);
-matrix_a = 1 ./ abs(matrix_a) + mu;
+matrix_a = 1 ./ (abs(matrix_a) + mu);
 
 % second step: calculate the diagonal matrix A
 matrix_a = matrix_a(:);
 [m, n] = size(detailA);
-matrix_a = sparse(1:1:m*n, 1:1:m*n, matrix_a(1:1:m*n)', m*n, m*n);
+matrix_a = sparse(1:1:m*n, 1:1:m*n, matrix_a(1:1:m*n)', m*n, m*n);    % in fact, the matrix_a is a diagonal matrix, whose elements are 2D matrix_a
 
-temp = sparse(1:1:m*n, 1:1:m*n, ones(1, m*n), m*n, m*n);
+U = sparse(1:1:m*n, 1:1:m*n, ones(1, m*n), m*n, m*n);
 gamma = 0.01;
 
-denominator = 2 * temp + gamma * (matrix_a + matrix_a');
+denominator = 2 * U + gamma * (matrix_a + matrix_a');
 numerator = 2 * ifu(:) + gamma * (matrix_a + matrix_a') * detailB(:);
 
 % third step: calculate the final 

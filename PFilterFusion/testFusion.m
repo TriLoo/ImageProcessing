@@ -23,7 +23,8 @@ end
 
 
 % parameters of gaussian filter
-params.gaussian_sigma = 1;
+% params.gaussian_sigma = 1;
+% sigmas of gaussian filter are same as propagation filter.
 
 % parameters of propagation filter
 pfilter_sigma_d = [0.5, 1.0, 2.0, 4.0];

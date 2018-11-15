@@ -1,6 +1,6 @@
 function [ fuseImg ] = baseLayerFusion( imgA, imgB, baseA, baseB )
 % Author: smh
-% Date  : 2018.11.13
+% Date  : 2018.10.28
 
 % do a laplacian to input layers
 lap_kernel = fspecial('laplacian');
@@ -16,7 +16,7 @@ iwpA = zeros(size(imgA));
 iwpB = zeros(size(imgB));
 
 % get the initial weight maps (iwp)(
-maskA = iwpA >= iwpB;
+maskA = imgA_lap_smooth >= imgB_lap_smooth;
 iwpA(maskA) = 1;
 iwpB(1-maskA) = 1;
 
