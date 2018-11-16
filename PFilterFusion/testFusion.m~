@@ -31,8 +31,7 @@ pfilter_sigma_d = [0.5, 1.0, 2.0, 4.0];
 pfilter_sigma_r = [1.5, 1.5, 1.5, 1.5];
 
 params.pfilter_w = 3;
-params.pfilter_sigma_d = pfilter_sigma_d;
-params.pfilter_sigma_r = pfilter_sigma_r;
+
 % params.pfilter_sigma = [pfilter_sigma_d, pfilter_sigma_r];
 
 

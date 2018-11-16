@@ -19,7 +19,7 @@ coeffImgs = cell(scales+1, 1);
 
 % Detail level 1
 SI_curr = imgaussfilt(img, sigma_ds(1));
-Ipf_last = pfilter(SI_curr, SI_curr, w, sigma_ds(1), sigma_rs(1)); 
+Ipf_last = pfilter(SI_curr, SI_curr, w, [sigma_ds(1), sigma_rs(1)]); 
 coeffImgs{1} = Ipf_last - img;
 
 for i  = 2:1:scales-1   % Levels from 2 to N - 1

@@ -17,8 +17,9 @@ iwpB = zeros(size(imgB));
 
 % get the initial weight maps (iwp)(
 maskA = imgA_lap_smooth >= imgB_lap_smooth;
+
 iwpA(maskA) = 1;
-iwpB(1-maskA) = 1;
+iwpB((1-maskA)==1) = 1;   % OR: iwpB(logical(1-maskA)) = 1;
 
 % use guided filter to get spatial consistency weight masks (fwm: final weight map)
 r = 45;
