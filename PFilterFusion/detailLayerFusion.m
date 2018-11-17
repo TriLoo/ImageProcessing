@@ -13,7 +13,8 @@ pmA = zeros(size(detailA));
 pmA(maskA) = 1;
 
 % apply gaussian filtering to pms for obtaining the smooth maps as:
-spm = imgaussfilt(pmA, 2);   % sigma = 2
+% spm = imgaussfilt(pmA, 2);   % sigma = 2, 
+spm = imgaussfilt(pmA, 2, 'FilterSize', 11);   % have a try using size = 11, 2018.11.17 night
 % spmB = imgaussfilt(pmB, 2);
 
 % obtain the initial combined detail layers IFu as following:
@@ -23,9 +24,14 @@ ifu = spm .* detailA + (1 - spm) .* detailB;
 % detail layer
 % first step: calculate matrix a
 mu = 0.0001;
-windowSum = ones(7);   % window size is set to 7 * 7
-matrix_a = conv2(detailA, windowSum);
-matrix_a = 1 ./ (abs(matrix_a) + mu);
+% windowSum = ones(7);   % window size is set to 7 * 7
+% matrix_a = conv2(detailA, windowSum);
+% matrix_a = 1 ./ (abs(matrix_a) + mu);
+
+% have a try as the implementation of 'image fusion with VSM and WLS', 2018.11.17:
+windowSum = ones(7) / sum(sum(ones(7))); 
+matrix_a = abs(imfilter(detailA, windowSum, 'replicate'));
+matrix_a = 1.0 ./ (matrix_a + mu);
 
 % second step: calculate the diagonal matrix A
 matrix_a = matrix_a(:);

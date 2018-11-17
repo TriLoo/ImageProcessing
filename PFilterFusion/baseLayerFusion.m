@@ -15,7 +15,7 @@ imgB_lap_smooth = imgaussfilt(abs(imgB_lap), 5, 'FilterSize', 11);
 iwpA = zeros(size(imgA));
 iwpB = zeros(size(imgB));
 
-% get the initial weight maps (iwp)(
+% get the initial weight maps (iwp)
 maskA = imgA_lap_smooth >= imgB_lap_smooth;
 
 iwpA(maskA) = 1;

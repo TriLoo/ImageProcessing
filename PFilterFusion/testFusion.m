@@ -3,13 +3,16 @@ clc;
 
 close all;
 
-imgA = imread('../datas/source20_1.tif');
-imgB = imread('../datas/source20_2.tif');
+% imgA = imread('../datas/source20_1.tif');
+% imgB = imread('../datas/source20_2.tif');
 
+imgA = imread('../datas/1827i.bmp');
+imgB = imread('../datas/1827v.bmp');
+                     
 % preprocess inputs
 if(size(imgA, 3) == 3)
     imgA = rgb2gray(imgA);
-end
+end;
 if(size(imgB, 3) == 3)
     imgB = rgb2gray(imgB);
 end
