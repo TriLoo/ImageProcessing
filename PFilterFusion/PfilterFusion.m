@@ -17,12 +17,12 @@ if(nargin ~= 3)
 end
 
 % PART I: MSD of input images using gfilter + pfilter
-pfilter_w = params.pfilter_w;
+window_sizes = params.window_size;
 pfilter_sigma_ds = params.pfilter_sigma_d;
 pfilter_sigma_rs = params.pfilter_sigma_r;
 
-coeffAs = PfilterGfilterMSD(imgA, pfilter_w, pfilter_sigma_ds, pfilter_sigma_rs);
-coeffBs = PfilterGfilterMSD(imgB, pfilter_w, pfilter_sigma_ds, pfilter_sigma_rs);
+coeffAs = PfilterGfilterMSD(imgA, window_sizes, pfilter_sigma_ds, pfilter_sigma_rs);
+coeffBs = PfilterGfilterMSD(imgB, window_sizes, pfilter_sigma_ds, pfilter_sigma_rs);
 
 
 % PART II: Fuse the coefficient matrices

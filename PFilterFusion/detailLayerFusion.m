@@ -13,8 +13,8 @@ pmA = zeros(size(detailA));
 pmA(maskA) = 1;
 
 % apply gaussian filtering to pms for obtaining the smooth maps as:
-% spm = imgaussfilt(pmA, 2);   % sigma = 2, 
-spm = imgaussfilt(pmA, 2, 'FilterSize', 11);   % have a try using size = 11, 2018.11.17 night
+spm = imgaussfilt(pmA, 2);   % sigma = 2, 
+% spm = imgaussfilt(pmA, 2, 'FilterSize', 11);   % have a try using size = 11, 2018.11.17 night
 % spmB = imgaussfilt(pmB, 2);
 
 % obtain the initial combined detail layers IFu as following:
