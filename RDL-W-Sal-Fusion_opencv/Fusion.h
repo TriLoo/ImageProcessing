@@ -21,6 +21,7 @@ public:
     ~Fusion();
 
     void imageFusion(cv::Mat& imgOut, const cv::Mat& imgInA, const cv::Mat& imgInB);
+    void imageFusionColor(cv::Mat& imgOut, const cv::Mat& imgInA, const cv::Mat& imgInB);
 private:
     std::shared_ptr<RDLWavelet> rdlPimpl;
     std::shared_ptr<WeightedMap> wmPimpl;

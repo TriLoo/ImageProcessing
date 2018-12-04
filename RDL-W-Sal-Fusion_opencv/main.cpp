@@ -21,8 +21,8 @@ int main() {
     //Mat imgA = imread("TankLWIR.tif", IMREAD_GRAYSCALE);
     //Mat imgB = imread("TankVis.tif", IMREAD_GRAYSCALE);
 
-    assert(imgA.empty() != true);
-    assert(imgB.empty() != true);
+    assert(!imgA.empty());
+    assert(!imgB.empty());
 
     imshow("Input A", imgA);
     imshow("Input B", imgB);

@@ -95,7 +95,27 @@ void Fusion::imageFusion(cv::Mat &imgOut, const cv::Mat &imgInA, const cv::Mat &
         cout << "Step " << Step++ << ": using " << elapsedTime.count() * 1000.0 << " ms.startPoints" << endl;
         freEndPoint = ele;
     }
-
-    //imgOut = tempMat;
 }
+
+void Fusion::imageFusionColor(cv::Mat &imgOut, const cv::Mat &imgInA, const cv::Mat &imgInB)
+{
+    assert(imgInA.channels() == 3);
+    assert(imgInB.channels() == 3);
+
+    vector<Mat> imgInA_RGB, imgInB_RGB, imgOut_RGB;
+    split(imgInA, imgInA_RGB);
+    split(imgInB, imgInB_RGB);
+
+    Mat inA, inB, Out;
+    for(int i = 0; i < 3; ++i)
+    {
+        inA = imgInA_RGB[i];
+        inB = imgInB_RGB[i];
+        imageFusion(Out, inA, inB);
+        imgOut_RGB.push_back(Out);
+    }
+
+    merge(imgOut_RGB, imgOut);
+}
+
 
