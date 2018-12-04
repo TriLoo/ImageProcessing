@@ -32,12 +32,17 @@ void Fusion::imageFusion(cv::Mat &imgOut, const cv::Mat &imgInA, const cv::Mat &
     assert(imgInA.channels() == 1);
     assert(imgInB.channels() == 1);
 
+    chrono::steady_clock::time_point startPoints;
+    vector<chrono::steady_clock::time_point> endPoints;
+
     //cout << "Success 1." << endl;
 
+    startPoints = chrono::steady_clock::now();
     // decomposing input image input base layers and detail layers
     vector<Mat> layersA(0), layersB(0);
     rdlPimpl->RdlWavelet(layersA, imgInA);
     rdlPimpl->RdlWavelet(layersB, imgInB);
+    endPoints.push_back(chrono::steady_clock::now());
 
     //imgShow(layersB[0]);
 
@@ -49,6 +54,8 @@ void Fusion::imageFusion(cv::Mat &imgOut, const cv::Mat &imgInA, const cv::Mat &
     //cout << imgIns.size() << endl;
     wmPimpl->setParams();
     wmPimpl->weightedmap(wmBase, wmDetail, imgIns);
+
+    endPoints.push_back(chrono::steady_clock::now());
 
     //imgShow(wmDetail[0]);
 
@@ -67,11 +74,27 @@ void Fusion::imageFusion(cv::Mat &imgOut, const cv::Mat &imgInA, const cv::Mat &
         layersA[i] = layersA[i].mul(wmDetail[0]) + layersB[i].mul(wmDetail[1]);
     //imgShow(layersA[1]);
 
+    endPoints.push_back(chrono::steady_clock::now());
+
     // inverse RDL Wavelet transform
     //Mat tempMat;
     //rdlPimpl->inverseRdlWavelet(tempMat, layersA);
     rdlPimpl->inverseRdlWavelet(imgOut, layersA);
     //imgShow(imgOut);
+
+    endPoints.push_back(chrono::steady_clock::now());
+
+    chrono::duration<double> elapsedTime;
+    chrono::steady_clock::time_point freEndPoint = startPoints;
+
+    int Step = 0;
+
+    for (auto & ele : endPoints)
+    {
+        elapsedTime = chrono::duration_cast<chrono::duration<double> >(ele - freEndPoint);
+        cout << "Step " << Step++ << ": using " << elapsedTime.count() * 1000.0 << " ms.startPoints" << endl;
+        freEndPoint = ele;
+    }
 
     //imgOut = tempMat;
 }

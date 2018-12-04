@@ -23,8 +23,9 @@ public:
 private:
     void Horizontal_Predict(cv::Mat& imgPre, const cv::Mat& imgIn);
     void Horizontal_Update(cv::Mat& layerBase, const cv::Mat& layerDetail, const cv::Mat& imgIn);
-
     void Inverse_Horizontal_Update(cv::Mat& imgOut,const cv::Mat& imgBase, const cv::Mat& imgDetail);
+
+    cv::Mat Horizontal_SincInterpolation(const cv::Mat& imgIn);
 
     int row, col, Dir;
 };

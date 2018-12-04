@@ -14,12 +14,12 @@ int main() {
     //Mat imgB = imread("Balls_Vis.bmp", IMREAD_GRAYSCALE);
     //Mat imgA = imread("IR_lake_g.bmp", IMREAD_GRAYSCALE);
     //Mat imgB = imread("VIS_lake_r.bmp", IMREAD_GRAYSCALE);
-    //Mat imgA = imread("Kaptein_1654_IR.bmp", IMREAD_GRAYSCALE);
-    //Mat imgB = imread("Kaptein_1654_Vis.bmp", IMREAD_GRAYSCALE);
+    Mat imgA = imread("Kaptein_1654_IR.bmp", IMREAD_GRAYSCALE);
+    Mat imgB = imread("Kaptein_1654_Vis.bmp", IMREAD_GRAYSCALE);
     //Mat imgA = imread("IR_meting012-1200_g.bmp", IMREAD_GRAYSCALE);
     //Mat imgB = imread("VIS_meting012-1200_r.bmp", IMREAD_GRAYSCALE);
-    Mat imgA = imread("TankLWIR.tif", IMREAD_GRAYSCALE);
-    Mat imgB = imread("TankVis.tif", IMREAD_GRAYSCALE);
+    //Mat imgA = imread("TankLWIR.tif", IMREAD_GRAYSCALE);
+    //Mat imgB = imread("TankVis.tif", IMREAD_GRAYSCALE);
 
     assert(imgA.empty() != true);
     assert(imgB.empty() != true);
@@ -44,9 +44,12 @@ int main() {
     chrono::duration<double> time_used = chrono::duration_cast<chrono::duration<double>>(stop - start);
     cout << "Time used: " << time_used.count() * 1000.0 << " ms." << endl;
 
-    //cout << "Success 3." << endl;
-
     imshow("Result", imgRes);
+
+    // Store the result
+    normalize(imgRes, imgRes, 0.0, 255.0, NORM_MINMAX);
+    imgRes.convertTo(imgRes, CV_8UC1, 1);
+    imwrite("Result.png", imgRes);
 
     waitKey(0);
 
