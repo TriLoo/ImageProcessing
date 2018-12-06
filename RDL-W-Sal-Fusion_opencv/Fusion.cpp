@@ -41,7 +41,22 @@ void Fusion::imageFusion(cv::Mat &imgOut, const cv::Mat &imgInA, const cv::Mat &
     // decomposing input image input base layers and detail layers
     vector<Mat> layersA(0), layersB(0);
     rdlPimpl->RdlWavelet(layersA, imgInA);
+    // the decomposition is not correct
+    //Mat temp;
+    //normalize(layersA[0], temp, 0.0, 1.0, NORM_MINMAX);
+    //temp.convertTo(temp, CV_8UC1, 255);
+    //imwrite("temp.png", temp);
+    //imshow("CA", layersA[0]);
+    //imshow("CH", layersA[1]);
+    //imshow("CV", layersA[2]);
+    //imshow("CD", layersA[3]);
+    //waitKey(0);
     rdlPimpl->RdlWavelet(layersB, imgInB);
+    //imshow("CA", layersB[0]);
+    //imshow("CH", layersB[1]);
+    //imshow("CV", layersB[2]);
+    //imshow("CD", layersB[3]);
+    //waitKey(0);
     endPoints.push_back(chrono::steady_clock::now());
 
     //imgShow(layersB[0]);
@@ -65,7 +80,9 @@ void Fusion::imageFusion(cv::Mat &imgOut, const cv::Mat &imgInA, const cv::Mat &
     assert(wmBase.size() == 2);
     assert(wmDetail.size() == 2);
     // Base layers fusion
-    layersA[0] = layersA[0].mul(wmBase[0]) + layersB[0].mul(wmBase[1]);
+    //layersA[0] = layersA[0].mul(wmBase[0]) + layersB[0].mul(wmBase[1]);
+    // mul: element-wise multiplication
+    layersA[0] = (layersA[0].mul(0.5 + 0.5 * (wmBase[0] - wmBase[1]))) + layersB[0].mul(0.5 + 0.5 * (wmBase[1] - wmBase[0]));
 
     //imgShow(layersA[0]);
 
@@ -117,5 +134,3 @@ void Fusion::imageFusionColor(cv::Mat &imgOut, const cv::Mat &imgInA, const cv::
 
     merge(imgOut_RGB, imgOut);
 }
-
-

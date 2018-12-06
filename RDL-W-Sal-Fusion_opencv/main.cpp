@@ -24,8 +24,8 @@ int main() {
     assert(!imgA.empty());
     assert(!imgB.empty());
 
-    imshow("Input A", imgA);
-    imshow("Input B", imgB);
+    //imshow("Input A", imgA);
+    //imshow("Input B", imgB);
 
     imgA.convertTo(imgA, CV_32F, 1.0 / 255);
     imgB.convertTo(imgB, CV_32F, 1.0 / 255);

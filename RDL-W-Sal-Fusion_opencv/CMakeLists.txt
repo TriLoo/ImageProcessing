@@ -3,6 +3,9 @@ project(RDLW_Sal_Fusion)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_BUILD_TYPE Release)
+#set(CMAKE_BUILD_TYPE Debug)
+
+
 
 find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INC_DIRS})

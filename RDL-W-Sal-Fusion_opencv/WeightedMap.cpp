@@ -3,6 +3,7 @@
 //
 
 #include "WeightedMap.h"
+#include <math.h>
 
 using namespace std;
 using namespace cv;
@@ -64,7 +65,7 @@ void WeightedMap::globalsaliency(cv::Mat &imgOut, const cv::Mat &imgIn)
     }
 
     cv::LUT(imgTemp, lut, imgOut);
-    cv::normalize(imgOut, imgOut, 0, 1, CV_MINMAX);
+    cv::normalize(imgOut, imgOut, 0, 1.0, CV_MINMAX);
 }
 
 // calculation of local saliency map
@@ -75,7 +76,7 @@ void WeightedMap::localsaliency(cv::Mat &sal, const cv::Mat &imgIn)
     Mat AvgMat(Size(col_, row_), imgIn.type());
     Mat GauMat(Size(col_, row_), imgIn.type());
 
-    boxFilter(imgIn, AvgMat, imgIn.depth(), Size(AvgRad_, AvgRad_));
+    boxFilter(imgIn, AvgMat, imgIn.depth(), Size(AvgRad_, AvgRad_), Point(-1, -1), true, BORDER_CONSTANT);
     GaussianBlur(imgIn, GauMat, Size(GauRad_, GauRad_), GauSig_);
 
     AvgMat = AvgMat - GauMat;
@@ -83,8 +84,10 @@ void WeightedMap::localsaliency(cv::Mat &sal, const cv::Mat &imgIn)
 
     // begin morphological filtering
     Mat kernel = getStructuringElement(MORPH_ELLIPSE, Size(5, 5));    // 椭圆形状
+    //Mat kernel = getStructuringElement(MORPH_CROSS, Size(5, 5));    // 椭圆形状
     morphologyEx(GauMat, AvgMat, MORPH_CLOSE, kernel);
 
+    normalize(AvgMat, AvgMat, 0.0, 1.0, NORM_MINMAX);
     sal = AvgMat;
 }
 
@@ -106,13 +109,11 @@ void WeightedMap::guidedfilter(cv::Mat &imgOut, const cv::Mat &imgInI, const cv:
     Mat meanI, meanP, corrI, corrIp;
 
     // Step 1 in Algorithm 1
-    boxFilter(imgInI, meanI, imgInI.depth(), Size(rad, rad));
-    boxFilter(imgInP, meanP, imgInP.depth(), Size(rad, rad));
-    boxFilter(imgInI.mul(imgInI), corrI, imgInI.depth(), Size(rad, rad));
-    boxFilter(imgInI.mul(imgInP), corrIp, imgInI.depth(), Size(rad, rad));
-    //assert(imgInI.type() == imgInP.type());
-    //cout << imgInI.depth() << endl;
-    //cout << imgInP.depth() << endl;
+    Point anchor = Point(-1, -1);
+    boxFilter(imgInI, meanI, imgInI.depth(), Size(rad, rad), anchor, true, BORDER_CONSTANT);
+    boxFilter(imgInP, meanP, imgInP.depth(), Size(rad, rad), anchor, true, BORDER_CONSTANT);
+    boxFilter(imgInI.mul(imgInI), corrI, imgInI.depth(), Size(rad, rad), anchor, true, BORDER_CONSTANT);
+    boxFilter(imgInI.mul(imgInP), corrIp, imgInI.depth(), Size(rad, rad), anchor, true, BORDER_CONSTANT);
     //cout << "Success 3.0." << endl;
 
     // Step 2 in Algorithm 1
@@ -128,8 +129,8 @@ void WeightedMap::guidedfilter(cv::Mat &imgOut, const cv::Mat &imgInI, const cv:
     //cout << "Success 3.2." << endl;
 
     // Step 4
-    boxFilter(a, meanI, a.depth(), Size(rad, rad));    // meanI --> meanA
-    boxFilter(b, meanP, b.depth(), Size(rad, rad));    // meanP --> meanB
+    boxFilter(a, meanI, a.depth(), Size(rad, rad), anchor, true, BORDER_CONSTANT);    // meanI --> meanA
+    boxFilter(b, meanP, b.depth(), Size(rad, rad), anchor, true, BORDER_CONSTANT);    // meanP --> meanB
 
     // Step 5
     imgOut = meanI.mul(imgInI) + meanP;
@@ -145,21 +146,30 @@ void WeightedMap::weightedmap(std::vector<cv::Mat> &wmBase, std::vector<cv::Mat>
 
     //cout << "Success 1." << endl;
 
-    //imshow("Input", imgIns[0]);
-    //waitKey(0);
-    //cout << imgIns[1].depth() << endl;
-
     Mat salA, salB;
     saliencydetection(salA, imgIns[0]);
     saliencydetection(salB, imgIns[1]);
 
-    //cout << "Success 2.1." << endl;
+    Mat salMapA = Mat::zeros(salA.size(), CV_32FC1);
+    Mat salMapB = Mat::zeros(salB.size(), CV_32FC1);
 
-    //cout << "Success 2." << endl;
+    //salMapA = salA > salB;     // salMapA is CV_8U
+    //salMapB = salB > salA;
+    for(int i = 0; i < salA.rows; ++i)
+    {
+        for(int j = 0; j < salA.cols; ++j)
+        {
+            if(salA.at<float>(i, j) > salB.at<float>(i, j))
+                salMapA.at<float>(i, j) = 255.0;
+            else
+                salMapB.at<float>(i, j) = 255.0;
+        }
+    }
 
-    Mat salMapA, salMapB;
-    salMapA = salA >= salB;
-    salMapB = salB > salA;
+    for(int i = 0; i < salMapA.rows; ++i)
+        for(int j = 0; j < salMapA.cols; ++j)
+            if(isnan(salMapA.at<float>(i, j)))
+                cout << "There is a nan in salMapA." << endl;
 
     //normalize(salMapA, salMapA, 0, 1, NORM_MINMAX);
     //normalize(salMapB, salMapB, 0, 1, NORM_MINMAX);
@@ -167,9 +177,8 @@ void WeightedMap::weightedmap(std::vector<cv::Mat> &wmBase, std::vector<cv::Mat>
     salMapB.convertTo(salMapB, CV_32F, 1.0/255);
 
     //cout << "Success 3." << endl;
-
     int r1 = 30, r2 = 7;
-    double eps1 = 10^(-4), eps2 = 10^(-6);
+    double eps1 = 1e-4, eps2 = 1e-6;
 
     Mat wmA, wmB, tempMat;
     // base layer
@@ -179,10 +188,7 @@ void WeightedMap::weightedmap(std::vector<cv::Mat> &wmBase, std::vector<cv::Mat>
     wmBase.push_back(wmA / tempMat);
     wmBase.push_back(wmB / tempMat);
 
-    //imgShow(wmA / tempMat);
-    //imgShow(wmB / tempMat);
     //cout << "Success 4." << endl;
-
     // detail layers
     guidedfilter(wmA, imgIns[0], salMapA, r2, eps2);
     guidedfilter(wmB, imgIns[1], salMapB, r2, eps2);

@@ -27,8 +27,6 @@ Mat RDLWavelet::Horizontal_SincInterpolation(const cv::Mat &imgIn)
     Mat Sinc = (Mat_<float>(3, 8) << -0.0110, 0.0452, -0.1437, 0.8950, 0.2777, -0.0812, 0.0233, -0.0158,
                                      -0.0105, 0.0465, -0.1525, 0.6165, 0.6165, -0.1525, 0.0465, -0.0105,
                                      -0.0053, 0.0233, -0.0812, 0.2777, 0.8950, -0.1437, 0.0452, -0.0110);
-    //cout << "Shape of Sinc Mat: " << Sinc.rows << " " << Sinc.cols << endl;
-    //cout << Sinc << endl;
 
     float sum1 = 0.0, sum2 = 0.0, sum3 = 0.0;
     for(int i = 0; i < inRows; ++i)
@@ -108,7 +106,9 @@ void RDLWavelet::Horizontal_Update(cv::Mat &layerBase,const cv::Mat &layerDetail
     Mat SincImgUpdate, SincImgUpdate_buf;
     // for test
     Mat imgTest(imgIn.size(), CV_32F);
+    //resize(layerDetail, SincImgUpdate, Size(4*col, row), 4, 0, INTER_CUBIC);
     SincImgUpdate = Horizontal_SincInterpolation(layerDetail);
+    //copyMakeBorder(SincImgUpdate, SincImgUpdate_buf, Dir, Dir, Dir, Dir, BORDER_REFLECT101);
     copyMakeBorder(SincImgUpdate, SincImgUpdate_buf, Dir, Dir, Dir, Dir, BORDER_WRAP);
     float tempSum = 0.0;
     //for (int i = Dir; i < Dir + row - 1; ++i)
@@ -135,10 +135,13 @@ void RDLWavelet::Inverse_Horizontal_Update(cv::Mat &imgOut, const cv::Mat& imgBa
     const float Dvid = 1.0 / (2 * (Dir * 2 + 1));
     Mat tempMat, tempMat_buf;
     Mat resMat(Size(colT, rowT), imgBase.type());
+    //resize(imgDetail, tempMat, Size(Dir * colT, rowT), Dir, 0, INTER_CUBIC);
     tempMat = Horizontal_SincInterpolation(imgDetail);
+    //copyMakeBorder(tempMat, tempMat_buf, Dir, Dir, Dir, Dir, BORDER_REFLECT101);
     copyMakeBorder(tempMat, tempMat_buf, Dir, Dir, Dir, Dir, BORDER_WRAP);
 
     float tempSum = 0.0;
+    //for (int i = Dir; i < Dir + rowT - 1; ++i)
     for (int i = Dir; i < Dir + rowT; ++i)
     {
         auto rowPtrUp = tempMat_buf.ptr<float>(i - 1);
@@ -165,6 +168,20 @@ void RDLWavelet::RdlWavelet(std::vector<cv::Mat> &imgOuts, const cv::Mat &imgIn)
     Mat imgH_Base(imgIn.size(), imgIn.type());
     Horizontal_Predict(imgH_Detail, imgIn);   // 他妈的是对的啊
     Horizontal_Update(imgH_Base, imgH_Detail, imgIn);
+
+    /**
+    imshow("imgH Detail", imgH_Detail);
+    Mat temp = imgH_Detail;
+    normalize(temp, temp, 0.0, 1.0, NORM_MINMAX);
+    temp.convertTo(temp, CV_8UC1, 255);
+    imwrite("imgH_Detail.png", temp);
+    */
+
+    //imshow("imgH Base", imgH_Base);
+    //waitKey(0);
+    // for test
+    // imgOuts.push_back(imgH_Base);
+    // imgOuts.push_back(imgH_Detail);
 
     // Vertical Predict & Update
     // Part I : LL, LH

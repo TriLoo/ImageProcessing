@@ -9,6 +9,9 @@
 #include "RDL_Wavelet.h"
 #include "WeightedMap.h"
 
+class RDLWavelet;
+class WeightedMap;
+
 class Fusion
 {
 public:
