@@ -39,65 +39,52 @@ void Fusion::imageFusion(cv::Mat &imgOut, const cv::Mat &imgInA, const cv::Mat &
 
     startPoints = chrono::steady_clock::now();
     // decomposing input image input base layers and detail layers
+    // however, std::vector is not thread safe
+    // nproc = 4
     vector<Mat> layersA(0), layersB(0);
-    rdlPimpl->RdlWavelet(layersA, imgInA);
-    // the decomposition is not correct
-    //Mat temp;
-    //normalize(layersA[0], temp, 0.0, 1.0, NORM_MINMAX);
-    //temp.convertTo(temp, CV_8UC1, 255);
-    //imwrite("temp.png", temp);
-    //imshow("CA", layersA[0]);
-    //imshow("CH", layersA[1]);
-    //imshow("CV", layersA[2]);
-    //imshow("CD", layersA[3]);
-    //waitKey(0);
-    rdlPimpl->RdlWavelet(layersB, imgInB);
-    //imshow("CA", layersB[0]);
-    //imshow("CH", layersB[1]);
-    //imshow("CV", layersB[2]);
-    //imshow("CD", layersB[3]);
-    //waitKey(0);
+    thread *ptRDL_A, *ptRDL_B, *ptWM;
+    //rdlPimpl->RdlWavelet(layersA, imgInA);
+    ptRDL_A = new thread(&RDLWavelet::RdlWavelet, rdlPimpl, std::ref(layersA), std::ref(imgInA));
+    //rdlPimpl->RdlWavelet(layersB, imgInB);
+    ptRDL_B = new thread(&RDLWavelet::RdlWavelet, rdlPimpl, std::ref(layersB), std::ref(imgInB));
     endPoints.push_back(chrono::steady_clock::now());
 
-    //imgShow(layersB[0]);
-
     //cout << "Success 2." << endl;
-
+    // calculate weighted map
     // calculation saliency map
     vector<Mat> wmBase(0), wmDetail(0);
     vector<Mat> imgIns = {imgInA, imgInB};
     //cout << imgIns.size() << endl;
     wmPimpl->setParams();
-    wmPimpl->weightedmap(wmBase, wmDetail, imgIns);
+    //wmPimpl->weightedmap(wmBase, wmDetail, imgIns);
+    ptWM = new thread(&WeightedMap::weightedmap, wmPimpl, std::ref(wmBase), std::ref(wmDetail), std::ref(imgIns));
 
+    // threads synchronize
+    ptWM->join();
+    ptRDL_A->join();
+    ptRDL_B->join();
     endPoints.push_back(chrono::steady_clock::now());
 
-    //imgShow(wmDetail[0]);
 
-    // Fusion the coefficients
     assert(layersA.size() == 4);
     assert(layersB.size() == 4);
     assert(wmBase.size() == 2);
     assert(wmDetail.size() == 2);
+
+
+    // Fusion the coefficients
     // Base layers fusion
-    //layersA[0] = layersA[0].mul(wmBase[0]) + layersB[0].mul(wmBase[1]);
     // mul: element-wise multiplication
     layersA[0] = (layersA[0].mul(0.5 + 0.5 * (wmBase[0] - wmBase[1]))) + layersB[0].mul(0.5 + 0.5 * (wmBase[1] - wmBase[0]));
-
-    //imgShow(layersA[0]);
 
     // detail layers fusion
     for (int i = 1; i < 4; ++i)
         layersA[i] = layersA[i].mul(wmDetail[0]) + layersB[i].mul(wmDetail[1]);
-    //imgShow(layersA[1]);
-
     endPoints.push_back(chrono::steady_clock::now());
 
+
     // inverse RDL Wavelet transform
-    //Mat tempMat;
-    //rdlPimpl->inverseRdlWavelet(tempMat, layersA);
     rdlPimpl->inverseRdlWavelet(imgOut, layersA);
-    //imgShow(imgOut);
 
     endPoints.push_back(chrono::steady_clock::now());
 
@@ -109,6 +96,10 @@ void Fusion::imageFusion(cv::Mat &imgOut, const cv::Mat &imgInA, const cv::Mat &
     for (auto & ele : endPoints)
     {
         elapsedTime = chrono::duration_cast<chrono::duration<double> >(ele - freEndPoint);
+        // Step 1: RDLWavelet decomposition of two input images
+        // Step 2: Calculation of Weighted Map
+        // Step 3: Calculation of final fused two layers
+        // Step 4: inverse RDLWavelet synthesis
         cout << "Step " << Step++ << ": using " << elapsedTime.count() * 1000.0 << " ms.startPoints" << endl;
         freEndPoint = ele;
     }

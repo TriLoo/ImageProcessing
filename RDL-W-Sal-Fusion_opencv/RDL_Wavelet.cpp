@@ -68,10 +68,16 @@ void RDLWavelet::Horizontal_Predict(cv::Mat &imgPre, const cv::Mat &imgIn)
 
     // Interpolation basing on Sinc
     //resize(imgIn, SincImg, Size(4 * col, row), 4, 0, INTER_CUBIC);
+    chrono::steady_clock::time_point start_point;
+    chrono::duration<double> elapsedTime;
+    start_point = chrono::steady_clock::now();
     SincImg = Horizontal_SincInterpolation(imgIn);
+    elapsedTime = chrono::steady_clock::now() - start_point;
+    cout << "Sinc Interpolation in Horizontal Predical Timing: " << elapsedTime.count() * 1000 << " ms." << endl;
 
     const int Dir = DIRECTION;
     const float Divd = 2 * ( 2 * Dir + 1 );
+
 
     // Pad border
     Mat SincImg_buf(Size(SincImg.cols + 2 * Dir, SincImg.rows + 2 * Dir), CV_32F);
@@ -164,6 +170,10 @@ void RDLWavelet::RdlWavelet(std::vector<cv::Mat> &imgOuts, const cv::Mat &imgIn)
     const int Dir = DIRECTION;
     //Mat tempMat(Size(col * Dir, row), imgIn.type());
 
+    chrono::steady_clock::time_point start_point;
+    chrono::duration<double> elapsedTime;
+
+
     Mat imgH_Detail(imgIn.size(), imgIn.type());
     Mat imgH_Base(imgIn.size(), imgIn.type());
     Horizontal_Predict(imgH_Detail, imgIn);   // 他妈的是对的啊
@@ -192,9 +202,14 @@ void RDLWavelet::RdlWavelet(std::vector<cv::Mat> &imgOuts, const cv::Mat &imgIn)
     Mat imgV_Base(imgIn.size(), imgIn.type());      // i.e. LL
 
     // begin predict
+    start_point = chrono::steady_clock::now();
     Horizontal_Predict(imgV_Detail, imgV_L);   // LH
+    elapsedTime = chrono::steady_clock::now() - start_point;
+    cout << "Horizontal Predict Timing: " << elapsedTime.count()  * 1000 << " ms." << endl;
     // begin update
     Horizontal_Update(imgV_Base, imgV_Detail, imgV_L);   // LL
+    elapsedTime = chrono::steady_clock::now() - start_point;
+    cout << "Horizontal Update Timing: " << elapsedTime.count()  * 1000 << " ms." << endl;
 
     imgOuts.push_back(imgV_Base.t());        // LL
     imgOuts.push_back(imgV_Detail.t());      // LH

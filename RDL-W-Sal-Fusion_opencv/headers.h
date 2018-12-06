@@ -12,6 +12,7 @@
 #include "stdexcept"
 #include "memory"
 #include "algorithm"
+#include <thread>
 
 #include "opencv2/imgproc.hpp"
 #include "opencv2/highgui.hpp"

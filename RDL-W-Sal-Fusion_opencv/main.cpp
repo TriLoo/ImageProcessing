@@ -10,12 +10,12 @@ int main() {
     //Mat imgB = imread("source20_2.tif", IMREAD_GRAYSCALE);
     //Mat imgA = imread("Marne_04_IR.bmp", IMREAD_GRAYSCALE);
     //Mat imgB = imread("Marne_04_Vis.bmp", IMREAD_GRAYSCALE);
-    //Mat imgA = imread("Balls_IR.bmp", IMREAD_GRAYSCALE);
-    //Mat imgB = imread("Balls_Vis.bmp", IMREAD_GRAYSCALE);
+    Mat imgA = imread("Balls_IR.bmp", IMREAD_GRAYSCALE);
+    Mat imgB = imread("Balls_Vis.bmp", IMREAD_GRAYSCALE);
     //Mat imgA = imread("IR_lake_g.bmp", IMREAD_GRAYSCALE);
     //Mat imgB = imread("VIS_lake_r.bmp", IMREAD_GRAYSCALE);
-    Mat imgA = imread("Kaptein_1654_IR.bmp", IMREAD_GRAYSCALE);
-    Mat imgB = imread("Kaptein_1654_Vis.bmp", IMREAD_GRAYSCALE);
+    //Mat imgA = imread("Kaptein_1654_IR.bmp", IMREAD_GRAYSCALE);
+    //Mat imgB = imread("Kaptein_1654_Vis.bmp", IMREAD_GRAYSCALE);
     //Mat imgA = imread("IR_meting012-1200_g.bmp", IMREAD_GRAYSCALE);
     //Mat imgB = imread("VIS_meting012-1200_r.bmp", IMREAD_GRAYSCALE);
     //Mat imgA = imread("TankLWIR.tif", IMREAD_GRAYSCALE);
@@ -38,11 +38,13 @@ int main() {
     Fusion fu(row, col);
 
     fu.imageFusion(imgRes, imgA, imgB);
+    cout << "----------*------------" << endl;
     auto start = chrono::steady_clock::now();
     fu.imageFusion(imgRes, imgA, imgB);
     auto stop = chrono::steady_clock::now();
     chrono::duration<double> time_used = chrono::duration_cast<chrono::duration<double>>(stop - start);
-    cout << "Time used: " << time_used.count() * 1000.0 << " ms." << endl;
+    cout << "----------*------------" << endl;
+    cout << "Total time used: " << time_used.count() * 1000.0 << " ms." << endl;
 
     imshow("Result", imgRes);
 
