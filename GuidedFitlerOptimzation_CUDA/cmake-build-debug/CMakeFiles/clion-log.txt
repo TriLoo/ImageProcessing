@@ -1,6 +1,0 @@
-/home/smher/Documents/Linux_setup_files/clion-2017.1.3/bin/cmake/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" /home/smher/myCUDA/GuidedFilterOptimize
--- Found CUDA: /usr/local/cuda (found version "8.0") 
--- Found CUDA: /usr/local/cuda (found version "8.0") 
--- Configuring done
--- Generating done
--- Build files have been written to: /home/smher/myCUDA/GuidedFilterOptimize/cmake-build-debug

@@ -1,3 +1,0 @@
-/home/smher/myCUDA/GuidedFilterOptimize/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/home/smher/myCUDA/GuidedFilterOptimize/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/smher/myCUDA/GuidedFilterOptimize/cmake-build-debug/CMakeFiles/GuidedFilterOptimize.dir

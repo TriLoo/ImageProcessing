@@ -1,3 +1,0 @@
-/home/smher/myOpenCV/HorizontalLine/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/home/smher/myOpenCV/HorizontalLine/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/smher/myOpenCV/HorizontalLine/cmake-build-debug/CMakeFiles/HorizontalLine.dir
