@@ -1,0 +1,20 @@
+@startuml
+actor FusionSystem
+
+participant RDLWavelet
+
+participant WeightedMap
+
+FusionSystem->RDLWavelet: doRDLWavelet
+
+FusionSystem-->WeightedMap:SaliencyDetection
+
+FusionSystem-->WeightedMap:GuidedFilter
+
+RDLWavelet-->WeightedMap:coeff matrices
+
+FusionSystem-->WeightedMap:FusionBasedOnWM
+
+FusionSystem->RDLWavelet:doInverseRDLWavelet
+
+@enduml
