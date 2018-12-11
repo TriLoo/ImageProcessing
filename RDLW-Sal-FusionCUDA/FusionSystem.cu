@@ -29,7 +29,8 @@ namespace IVFusion
     FusionSystem::FusionSystem(int r, int c) : rows_(r), cols_(c), cudaStatus_(cudaSuccess)
     {
         // pre-allocate memory on gpu
-        cudaCheckError(cudaMalloc(&d_imgIn_, sizeof(float) * r * c));
+        cudaCheckError(cudaMalloc(&d_imgInA_, sizeof(float) * r * c));
+        cudaCheckError(cudaMalloc(&d_imgInB_, sizeof(float) * r * c));
         cudaCheckError(cudaMalloc(&d_imgOut_, sizeof(float) * r * c));
 
         cudaCheckError(cudaMalloc(&d_tempA_, sizeof(float) * r * c));
@@ -68,15 +69,22 @@ namespace IVFusion
 
         // create used other classes
         mpRDLWavelet_ = new RDLWavelet(r, c, 4);
+        mpWeightedMap_ = new WeightedMap(r, c);
+        mpWeightedMap_->setParams();
     }
 
     FusionSystem::~FusionSystem()
     {
         // destroy allocated gpu memory
-        if(d_imgIn_ != nullptr)
+        if(d_imgInA_ != nullptr)
         {
-            cudaFree(d_imgIn_);
-            d_imgIn_ = nullptr;
+            cudaFree(d_imgInA_);
+            d_imgInA_ = nullptr;
+        }
+        if(d_imgInB_ != nullptr)
+        {
+            cudaFree(d_imgInB_);
+            d_imgInB_ = nullptr;
         }
         if(d_imgOut_ != nullptr)
         {
@@ -216,18 +224,57 @@ namespace IVFusion
     //void FusionSystem::doFusion(cv::Mat &imgOut, cv::Mat &imgInA, cv::Mat &imgInB)
     void FusionSystem::doFusion(cv::Mat &imgOut, cv::Mat &imgInA, cv::Mat &imgInB)
     {
+        /**
+        // test whole fusion system
+        float *h_imgInA = (float *)imgInA.data;
+        float *h_imgInB = (float *)imgInB.data;
+        float *h_imgOut = (float *)imgOut.data;
+
+        std::cout << "image size in fs: " << rows_ << " * " << cols_ << std::endl;
+        cudaCheckError(cudaMemcpy(d_imgInA_, h_imgInA, sizeof(float) * rows_ * cols_, cudaMemcpyHostToDevice));
+        cudaCheckError(cudaMemcpy(d_imgInB_, h_imgInB, sizeof(float) * rows_ * cols_, cudaMemcpyHostToDevice));
+
+        // Step 1: do RDLWavelet decomposition to two input images
+        mpRDLWavelet_->doRDLWavelet(d_cD_A_, d_cV_A_, d_cH_A_, d_cA_A_, d_imgInA_);
+        mpRDLWavelet_->doRDLWavelet(d_cD_B_, d_cV_B_, d_cH_B_, d_cA_B_, d_imgInB_);
+
+        // Step 2: generate weighted map
+        mpWeightedMap_->doWeightedMap(d_wmDetailA_, d_wmDetailB_, d_wmBaseA_, d_wmBaseB_, imgInA, imgInB);
+
+        // Step 3: Fusion the matrices
+        // TODO
 
 
-        // test RDLWavelet
+        // Step 4: inverse RDLWavelet
+        mpRDLWavelet_->doInverseRDLWavelet(d_imgOut_, d_cD_A_, d_cV_A_, d_cH_A_, d_cA_A_);
+        */
+
+
+
+
+
+
+
+        // test Weighted Map
+        mpWeightedMap_->doWeightedMap(d_wmDetailA_, d_wmDetailB_, d_wmBaseA_, d_wmBaseB_, d_imgInA_, d_imgInB_, imgInA, imgInB);
+
+        /**
+        // test RDLWavelet, AC
         float *h_imgInA = (float *)imgInA.data;
         float *h_imgOut = (float *)imgOut.data;
 
         std::cout << "image size in fs: " << rows_ << " * " << cols_ << std::endl;
-        cudaCheckError(cudaMemcpy(d_imgIn_, h_imgInA, sizeof(float) * rows_ * cols_, cudaMemcpyHostToDevice));
+        cudaCheckError(cudaMemcpy(d_imgInA_, h_imgInA, sizeof(float) * rows_ * cols_, cudaMemcpyHostToDevice));
 
-        mpRDLWavelet_->doRDLWavelet(d_cD_A_, d_cV_A_, d_cH_A_, d_cA_A_, d_imgIn_);
+        mpRDLWavelet_->doRDLWavelet(d_cD_A_, d_cV_A_, d_cH_A_, d_cA_A_, d_imgInA_);
+        mpRDLWavelet_->doInverseRDLWavelet(d_imgOut_, d_cD_A_, d_cV_A_, d_cH_A_, d_cA_A_);
 
-        cudaCheckError(cudaMemcpy(h_imgOut, d_cA_A_, sizeof(float) * rows_ * cols_, cudaMemcpyDeviceToHost));
+        //cudaCheckError(cudaMemcpy(h_imgOut, d_cA_A_, sizeof(float) * rows_ * cols_, cudaMemcpyDeviceToHost));
+        cudaCheckError(cudaMemcpy(h_imgOut, d_imgOut_, sizeof(float) * rows_ * cols_, cudaMemcpyDeviceToHost));
+
+        cudaDeviceSynchronize();
+        */
     }
 
 }   // IVFusion
+

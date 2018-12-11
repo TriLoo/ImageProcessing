@@ -32,7 +32,7 @@ namespace IVFusion
         float *h_imgIn_, *h_imgOut_;
 
         // memory on GPU
-        float *d_imgOut_, *d_imgIn_;
+        float *d_imgOut_, *d_imgInA_, *d_imgInB_;
         float *d_tempA_, *d_tempB_;  // *d_tempC_, *d_tempD_, *d_tempE_, *d_tempF_, *d_tempG_, *d_tempH_, *d_tempI_, *d_tempM_, *d_tempN_;
         float *d_cA_A_, *d_cH_A_, *d_cV_A_, *d_cD_A_, *d_cA_B_, *d_cH_B_, *d_cV_B_, *d_cD_B_;
         float *d_wmBaseA_, *d_wmBaseB_, *d_wmDetailA_, *d_wmDetailB_;

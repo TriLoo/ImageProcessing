@@ -21,6 +21,13 @@ namespace IVFusion
                      };
         cudaCheckError(cudaMemcpyToSymbol(SincKernel, Sinc, sizeof(float) * 8 * 3));
 
+        // set the thread hirearchy
+        threadPerBlock_ = dim3(BLOCKSIZE, BLOCKSIZE);
+        blockPerGrid_.x = iDiv(c, BLOCKSIZE);
+        blockPerGrid_.y = iDiv(r, BLOCKSIZE);
+        // OR
+        //blockPerGrid_ = dim3(iDiv(c, BLOCKSIZE), iDiv(r, BLOCKSIZE));
+
         // temporary allocated memory
         cudaCheckError(cudaMalloc(&d_Sinc_, sizeof(float) * r * c * 4));
         cudaCheckError(cudaMalloc(&d_temp_, sizeof(float) * r * c));
@@ -430,12 +437,8 @@ namespace IVFusion
     void RDLWavelet::doRDLWavelet(float *d_cD, float *d_cV, float *d_cH, float *d_cA, float *d_imgIn)
     {
         // Step 1: Horizontal Predict & Update
-        std::cout << "Success." << std::endl;
         HorizontalPredict(d_temp_, d_imgIn);                       // d_temp_     ->     H
-        std::cout << "Success." << std::endl;
         HorizontalUpdate(d_cA, d_temp_, d_imgIn);                  // d_tempB_    ->     L
-        std::cout << "Success." << std::endl;
-
 
         // Step 2: Vertical Predict & Update
         VerticalPredict(d_cD, d_temp_);                            // d_cD     ->      HH
@@ -444,10 +447,7 @@ namespace IVFusion
         VerticalPredict(d_cH, d_cA);                               // d_cH       ->      LH
         VerticalUpdate(d_temp_, d_cH, d_cA);                       // d_temp_    ->      LL
 
-        std::cout << "Success." << std::endl;
-
         cudaCheckError(cudaMemcpy(d_cA, d_temp_, sizeof(float) * rows_ * cols_, cudaMemcpyDeviceToDevice));
-
         cudaCheckError(cudaPeekAtLastError());
     }
 

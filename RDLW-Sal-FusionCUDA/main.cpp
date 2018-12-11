@@ -42,9 +42,15 @@ int main() {
 
 
     // test for FusionSystem + RDLWavelet
+    //IVFusion::FusionSystem fs(rows, cols);
+    //fs.doFusion(imgOut, imgInA, imgInB);
+
+    // test for FusionSystem + Weighted Map
     IVFusion::FusionSystem fs(rows, cols);
     fs.doFusion(imgOut, imgInA, imgInB);
 
+
+    // show result
     imshow("test", imgOut);
     waitKey();
 
