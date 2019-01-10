@@ -95,11 +95,120 @@ smh
 
   [3] [浅谈UML中的聚合与组合](https://blog.csdn.net/liushuijinger/article/details/6994265)
 
+## RDLW-Sal based fusion system 成员分析
 
-  
+* FusionSystem
 
+  * 函数成员
 
+    void doFusion(cv::Mat& imgOut, cv::Mat& imgInA, cv::Mat& imgInB);
 
-  [2] 
+    void setGFParams();
 
+  * 变量成员
 
+    RDLWavelet *mpRDLWavelet_;
+
+    mpWeightedMap *mpWeightedMap_;
+
+* RDLWavelet
+
+  * 函数成员
+
+    void doRDLWavelet();
+
+    void doInverseRDLWavelet();
+
+    私有函数成员
+
+    void HorizontalPredict();
+
+    void VerticalPredict();
+
+    void HorizontalUpdate();
+
+    void VerticalUpdate();
+
+    void InverseHorizontalUpdate();
+
+    void InverseVerticalUpdate();
+
+  * 变量成员
+
+* WeightedMap
+
+  * 函数成员
+
+    void setParams();
+
+    void doWeightedMap();
+
+    私有函数成员
+
+    void localsaliency();
+
+    void globalsaliency();
+
+    void doSaliencyDetection();
+
+  * 变量成员
+
+    GuidedFilter *mpGuidedFilter_;
+
+* GuidedFilter
+
+  * 函数成员
+
+    void doGuidedFilter();
+
+    私有函数成员
+
+    void bindTexture();
+
+    void releaseTexture();
+
+    void boxfilterImgI(); 
+
+    void boxfilterImgP();
+
+    void boxfilterCorrI();
+
+    void boxfilterCorrIp();
+
+## RDLW-Sal based Fusion System UML类图
+
+* 各个类之间的关系应当是**组合**，理由如下：
+
+  * 存在整体-与个体的关系，因此不是关联
+
+  * 整体与个体之间生存周期一致，因此不是聚合
+
+  综上所属，各个类之间应该是组合关系。
+
+* 类图
+
+  类图是显示出类、接口以及它们之间的静态结构与关系的图。其中最基本的单元是类或接口。
+
+  类图一般分为几个部分：
+
+  * 类名
+
+    如果是正体字，则说明该类是一个具体的类；如果是斜体字，则说明该类是一个抽象类。
+
+  * 属性列表
+
+    属性可以是public, private, protect，可以分别用+、-、#代表。
+
+  * 方法
+
+    方法也可以用+、-、#分别表示public、private、protect。对于静态属性，属性名会加上一条下划线。
+
+  此外，类图既能表示类之间的关系，还能表示对象之间的关系。二者的区别在于：对象图中对象名下面会加上一条下划线。
+
+* 时序图
+
+  是为了展示对象之间的交互细节。
+
+  时序图是显示对象之间交互的图，这些对象是按照顺序排列的。时序图中现实的是参与交互的对象以及对象之间消息交互的顺序。
+
+  时序图包括的建模元素由：对象(Actor)、生命线(Lifeline)、控制焦点(Focus of control)、消息(Message)等。
