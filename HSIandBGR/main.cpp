@@ -83,14 +83,14 @@ void convertHSItoBGR(Mat& imgOut, const cv::Mat &imgI, const cv::Mat& imgS, cons
 				h -= 2 * M_PI / 3;
 				r = ic * (1 - s);
 				g = ic * (1 + s * cos(h) / cos(M_PI / 3 - h));
-				b = 3 * ic - (r + b);
+				b = 3 * ic - (r + g);
 			}
 			else                        // BR
 			{
 				h -= 4 * M_PI / 3;
 				g = ic * (1 - s);
 				b = ic * (1 + s * cos(h) / cos(M_PI / 3 - h));
-				r = 3 * ic - (r + b);
+				r = 3 * ic - (g + b);
 			}
 
 			//imgOut.at<Vec3f>(i, j) = Vec3f(b, g, r);
